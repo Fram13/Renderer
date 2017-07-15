@@ -115,6 +115,7 @@
     <ClInclude Include="geometry.h" />
     <ClInclude Include="matrix4.h" />
     <ClInclude Include="model.h" />
+    <ClInclude Include="shader.h" />
     <ClInclude Include="tgaimage.h" />
     <ClInclude Include="vec3.h" />
     <ClInclude Include="vec4.h" />
