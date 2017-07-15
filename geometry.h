@@ -1,9 +1,9 @@
 #pragma once
 
 #include "vec3.h"
-#include "vec4.h"
 #include "matrix4.h"
 
+//Содержит необходимые методы для геометрических преобразований.
 class geometry
 {
 public:
@@ -18,5 +18,5 @@ public:
 
 private:
 	//Допустимая погрешность вычислений.
-	static double e;
+	static float e;
 };

@@ -13,18 +13,18 @@ public:
 		struct
 		{
 			//Компонента вектора.
-			double x, y, z;
+			float x, y, z;
 		};
 
 		//Компоненты вектора.
-		double components[3];
+		float raw[3];
 	};
 
 	//Создает экземпляр vec3 и инициализирует его поля значениями по умолчанию.
 	vec3();
 
 	//Создает экземпляр vec3 и инициализирует его поля указанными значениями.
-	vec3(double x, double y, double z);
+	vec3(float x, float y, float z);
 
 	//Возвращает сумму данного и указанного векторов.
 	vec3 add(vec3& other);
@@ -33,16 +33,16 @@ public:
 	vec3 subtract(vec3& other);
 
 	//Возвращает произведение на число данного вектора.
-	vec3 multiply(double scalar);
+	vec3 multiply(float scalar);
 
 	//Возвращает скалярное произведение данного и указанного векторов.
-	double dot_product(vec3& other);
+	float dot_product(vec3& other);
 
 	//Возвращает векторное произведение данного и указанного векторов.
 	vec3 cross_product(vec3& other);
 
 	//Возвращает вторую норму (длину) вектора.
-	double norm();
+	float norm();
 
 	//Возвращает орт данного вектора.
 	vec3 normalize();
@@ -54,23 +54,23 @@ public:
 	vec3 operator-(vec3& other);
 
 	//Возвращает произведение на число данного вектора.
-	vec3 operator*(double scalar);
+	vec3 operator*(float scalar);
 
 	//Возвращает скалярное произведение данного и указанного векторов.
-	double operator*(vec3& other);
+	float operator*(vec3& other);
 
 	//Возвращает векторное произведение данного и указанного векторов.
 	vec3 operator^(vec3& other);
 
 	//Возвращает указанную компоненту вектора.
-	double& operator[](int ind);
+	float& operator[](int ind);
 
 	//Выполняет присванивание указанного вектора данному.
 	vec3& operator=(vec3& other);
 
 private:
 	//Допустимая погрешность вычислений.
-	const double e = 1e-9;
+	const float e = 1e-9f;
 
 	//Размер пространства вектора.
 	const int size = 3;

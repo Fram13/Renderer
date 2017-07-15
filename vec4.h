@@ -13,18 +13,18 @@ public:
 		struct
 		{
 			//Компонента вектора.
-			double x, y, z, w;
+			float x, y, z, w;
 		};
 
 		//Компоненты вектора.
-		double components[4];
+		float raw[4];
 	};
 
 	//Создает экземпляр vec4 и инициализирует его поля значениями по умолчанию.
 	vec4();
 
 	//Создает экземпляр vec4 и инициализирует его поля указанными значениями.
-	vec4(double x, double y, double z, double w);
+	vec4(float x, float y, float z, float w);
 
 	//Возвращает сумму данного и указанного векторов.
 	vec4 add(vec4& other);
@@ -33,13 +33,13 @@ public:
 	vec4 subtract(vec4& other);
 
 	//Возвращает произведение на число данного вектора.
-	vec4 multiply(double scalar);
+	vec4 multiply(float scalar);
 
 	//Возвращает скалярное произведение данного и указанного векторов.
-	double dot_product(vec4& other);
+	float dot_product(vec4& other);
 
 	//Возвращает вторую норму (длину) вектора.
-	double norm();
+	float norm();
 
 	//Возвращает орт данного вектора.
 	vec4 normalize();
@@ -51,20 +51,20 @@ public:
 	vec4 operator-(vec4& other);
 
 	//Возвращает произведение на число данного вектора.
-	vec4 operator*(double scalar);
+	vec4 operator*(float scalar);
 
 	//Возвращает скалярное произведение данного и указанного векторов.
-	double operator*(vec4& other);
+	float operator*(vec4& other);
 
 	//Возвращает указанную компоненту вектора.
-	double& operator[](int ind);
+	float& operator[](int ind);
 
 	//Выполняет присванивание указанного вектора данному.
 	vec4& operator=(vec4& other);
 
 private:
 	//Допустимая погрешность вычислений.
-	const double e = 1e-9;
+	const float e = 1e-9f;
 
 	//Размер пространства вектора.
 	const int size = 4;

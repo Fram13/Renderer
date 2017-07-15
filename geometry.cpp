@@ -1,6 +1,6 @@
 #include "geometry.h"
 
-double geometry::e = 1e-9;
+float geometry::e = 1e-9f;
 
 vec3 geometry::to_3d(vec4& vec)
 {
@@ -8,7 +8,7 @@ vec3 geometry::to_3d(vec4& vec)
 
 	if (abs(vec.w) > e)
 	{
-		res = res * (1.0 / vec.w);
+		res = res * (1.0f / vec.w);
 	}
 
 	return res;
@@ -16,5 +16,5 @@ vec3 geometry::to_3d(vec4& vec)
 
 vec4 geometry::to_4d(vec3& vec)
 {
-	return vec4(vec.x, vec.y, vec.z, 1.0);
+	return vec4(vec.x, vec.y, vec.z, 1.0f);
 }
