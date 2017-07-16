@@ -5,7 +5,7 @@ model::model(const char* modelPath)
 	input.open(modelPath);
 
 	if (!input.is_open())
-		throw invalid_argument("Can not open the file.");
+		throw std::invalid_argument("Can not open the file.");
 
 	texture = nullptr;
 
@@ -17,7 +17,7 @@ model::model(const char* modelPath, const char* texturePath)
 	input.open(modelPath);
 
 	if (!input.is_open())
-		throw invalid_argument("Can not open the file.");
+		throw std::invalid_argument("Can not open the file.");
 
 	texture = new TGAImage();
 
@@ -25,7 +25,7 @@ model::model(const char* modelPath, const char* texturePath)
 	{
 		delete texture;
 		texture = nullptr;
-		throw invalid_argument("Can not open the file.");
+		throw std::invalid_argument("Can not open the file.");
 	}
 
 	load();
@@ -45,8 +45,6 @@ void model::load()
 	char s;
 	float x, y, z;
 
-	vector<vec3> v, vt, vn;
-
 	while (!input.eof())
 	{
 		input >> s;
@@ -62,15 +60,15 @@ void model::load()
 
 			if (s == 't')
 			{
-				vt.push_back(vec3(x, y, z));
+				texture_vertices.push_back(vec3({ x, y, z }));
 			}
 			else if (s == 'n')
 			{
-				vn.push_back(vec3(x, y, z));
+				normals.push_back(vec3({ x, y, z }));
 			}
 			else
 			{
-				v.push_back(vec3(x, y, z));
+				vertices.push_back(vec3({ x, y, z }));
 			}
 		}
 		else if (s == 'f')
@@ -91,9 +89,24 @@ void model::load()
 	}
 }
 
-vector<face>& model::get_faces()
+std::vector<face>& model::get_faces()
 {
 	return faces;
+}
+
+std::vector<vec3>& model::get_vertices()
+{
+	return vertices;
+}
+
+std::vector<vec3>& model::get_texture_vertices()
+{
+	return texture_vertices;
+}
+
+std::vector<vec3>& model::get_normals()
+{
+	return normals;
 }
 
 TGAImage& model::get_texture()

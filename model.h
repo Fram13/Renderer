@@ -1,12 +1,10 @@
 #pragma once
 
 #include "geometry.h"
-#include "tgaimage.h"
 #include "face.h"
+#include "tgaimage.h"
 #include <vector>
 #include <fstream>
-#include <stdexcept>
-using namespace std;
 
 //Представляет модель в формате Wavefront OBJ.
 class model
@@ -22,17 +20,35 @@ public:
 	~model();
 
 	//Возвращает массив, содержащий полигоны модели.
-	vector<face>& get_faces();
+	std::vector<face>& get_faces();
+
+	//Возвращает массив, содержащий вершинные координаты модели.
+	std::vector<vec3>& get_vertices();
+
+	//Возвращает массив, содержащий текстурные координаты модели.
+	std::vector<vec3>& get_texture_vertices();
+
+	//Возвращает массив, содержащий нормали модели.
+	std::vector<vec3>& get_normals();
 
 	//Возвращает текстуру модели.
 	TGAImage& get_texture();
 
 private:
 	//Поток файла OBJ.
-	ifstream input;
+	std::ifstream input;
 
 	//Массив полигонов модели.
-	vector<face> faces;
+	std::vector<face> faces;
+
+	//Массив вершинных координат модели.
+	std::vector<vec3> vertices;
+
+	//Массив текстурных координат модели.
+	std::vector<vec3> texture_vertices;
+
+	//Массив нормалей модели.
+	std::vector<vec3> normals;
 
 	//Указатель на текстуру модели.
 	TGAImage* texture;
