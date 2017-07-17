@@ -22,7 +22,7 @@ public:
 	}
 
 	//Вычисляет глобальные барицентрические координаты на основе экранных барицентрических координат.
-	static vec3 global_barycentric_coords(vec3& screen_coords, matrix3& vertices, float r)
+	static vec3 global_barycentric(vec3& screen_coords, matrix3& vertices, float r)
 	{
 		float rz1 = r * vertices[0][2] + 1.0f;
 		float rz2 = r * vertices[1][2] + 1.0f;

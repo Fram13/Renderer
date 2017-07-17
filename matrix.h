@@ -26,7 +26,7 @@ public:
 
 			while (j < COLUMNS && columns_iter != rows_iter->end())
 			{
-				rows[i][j] = *columns_iter;
+				raw[i][j] = *columns_iter;
 				columns_iter++;
 				j++;
 			}
@@ -38,7 +38,16 @@ public:
 
 	matrix(std::initializer_list<vector<ROWS>> init_list)
 	{
+		auto iter = init_list.begin();
+		int j = 0;
 
+		while (j < COLUMNS && iter != init_list.end())
+		{
+			for (int i = 0; i < ROWS; i++)
+			{
+				raw[i][j] = (*iter)[i];
+			}
+		}
 	}
 
 	vector<ROWS> multiply(vector<COLUMNS>& other)
@@ -47,7 +56,7 @@ public:
 
 		for (int i = 0; i < ROWS; i++)
 		{
-			res[i] = rows[i] * other;
+			res[i] = raw[i] * other;
 		}
 
 		return res;
@@ -63,7 +72,7 @@ public:
 		{
 			for (int j = 0; j < OTHER_COLUMNS; j++)
 			{
-				res[i][j] = rows[i] * other_tr[j];
+				res[i][j] = raw[i] * other_tr[j];
 			}
 		}
 
@@ -78,7 +87,7 @@ public:
 		{
 			for (int j = 0; j < COLUMNS; j++)
 			{
-				res[j][i] = rows[i][j];
+				res[j][i] = raw[i][j];
 			}
 		}
 
@@ -89,7 +98,27 @@ public:
 	{
 		static_assert(ROWS == COLUMNS, "Inverse matrix must be square (at matrix<ROWS, COLUMNS>.inverse())");
 
-		
+		matrix<ROWS, COLUMNS> matr = *this;
+		matrix<ROWS, COLUMNS> res = identity();
+
+		for (int i = 0; i < ROWS; i++)
+		{
+			float m = 1.0f / matr[i][i];
+			matr[i] = matr[i] * m;
+			res[i] = rs[i] * m;
+
+			for (int j = 0; j < COLU; j++)
+			{
+				if (j != i)
+				{
+					m = matr[j][i];
+					matr[j] = matr[j] - matr[i] * m;
+					res[j] = res[j] - res[i] * m;
+				}
+			}
+		}
+
+		return res;
 	}
 
 	vector<ROWS> operator*(vector<COLUMNS>& other)
@@ -110,14 +139,14 @@ public:
 			throw std::out_of_range("Index is out of range.");
 		}
 
-		return rows[ind];
+		return raw[ind];
 	}
 
 	matrix<ROWS, COLUMNS>& operator=(matrix<ROWS, COLUMNS>& other)
 	{
 		for (int i = 0; i < ROWS; i++)
 		{
-			rows[i] = other[i];
+			raw[i] = other[i];
 		}
 
 		return *this;
@@ -126,7 +155,7 @@ public:
 	static matrix<ROWS, COLUMNS> identity();
 
 private:
-	vector<COLUMNS> rows[ROWS];
+	vector<COLUMNS> raw[ROWS];
 };
 
 template <int ROWS, int COLUMNS>
