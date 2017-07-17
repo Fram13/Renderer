@@ -206,5 +206,5 @@ vector<SIZE> vector<SIZE>::cross_product(vector<SIZE>& vec1, vector<SIZE>& vec2)
 {
 	static_assert(SIZE == 3, "Cross product can only be computed in a three-dimensional space (at vector<SIZE>::cross_product(vector<SIZE>& vec1, vector<SIZE>& vec2))");
 
-	return vec3({ vec1[1] * vec2[2] - vec2[1] * vec1[2], -(vec1[0] * vec2[2] - vec2[0] * vec1[2]), vec1[0] * vec2[1] - vec2[0] * vec1[1] });
+	return vector<SIZE>({ vec1[1] * vec2[2] - vec2[1] * vec1[2], -(vec1[0] * vec2[2] - vec2[0] * vec1[2]), vec1[0] * vec2[1] - vec2[0] * vec1[1] });
 }

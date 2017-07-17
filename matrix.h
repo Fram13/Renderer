@@ -36,6 +36,11 @@ public:
 		}
 	}
 
+	matrix(std::initializer_list<vector<ROWS>> init_list)
+	{
+
+	}
+
 	vector<ROWS> multiply(vector<COLUMNS>& other)
 	{
 		vector<ROWS> res;
@@ -84,7 +89,7 @@ public:
 	{
 		static_assert(ROWS == COLUMNS, "Inverse matrix must be square (at matrix<ROWS, COLUMNS>.inverse())");
 
-		//return inverse...
+		
 	}
 
 	vector<ROWS> operator*(vector<COLUMNS>& other)
