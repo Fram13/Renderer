@@ -45,7 +45,8 @@ public:
 		{
 			for (int i = 0; i < ROWS; i++)
 			{
-				raw[i][j] = (*iter)[i];
+				vector<ROWS> vec = *iter;
+				raw[i][j] = vec[i];
 			}
 
 			iter++;
@@ -108,7 +109,7 @@ public:
 		{
 			float m = 1.0f / matr[i][i];
 			matr[i] = matr[i] * m;
-			res[i] = rs[i] * m;
+			res[i] = res[i] * m;
 
 			for (int j = 0; j < COLUMNS; j++)
 			{
