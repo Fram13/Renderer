@@ -47,6 +47,9 @@ public:
 			{
 				raw[i][j] = (*iter)[i];
 			}
+
+			iter++;
+			j++;
 		}
 	}
 
@@ -107,7 +110,7 @@ public:
 			matr[i] = matr[i] * m;
 			res[i] = rs[i] * m;
 
-			for (int j = 0; j < COLU; j++)
+			for (int j = 0; j < COLUMNS; j++)
 			{
 				if (j != i)
 				{

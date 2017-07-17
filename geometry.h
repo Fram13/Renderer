@@ -7,7 +7,6 @@ using vec4 = vector<4>;
 using matrix3 = matrix<3, 3>;
 using matrix4 = matrix<4, 4>;
 
-//Содержит необходимые методы для геометрических преобразований.
 class geometry
 {
 public:

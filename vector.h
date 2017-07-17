@@ -100,7 +100,7 @@ public:
 
 	vector<SIZE> normalize()
 	{
-		T length = norm();
+		float length = norm();
 
 		if (length > E)
 		{
