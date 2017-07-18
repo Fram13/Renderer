@@ -111,12 +111,20 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="face.h" />
+    <ClInclude Include="shader.h" />
     <ClInclude Include="geometry.h" />
     <ClInclude Include="matrix.h" />
+    <ClInclude Include="wavefront_model.h" />
+    <ClInclude Include="renderer.h" />
+    <ClInclude Include="tgaimage.h" />
     <ClInclude Include="vector.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="wavefront_model.cpp" />
+    <ClCompile Include="renderer.cpp" />
+    <ClCompile Include="tgaimage.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

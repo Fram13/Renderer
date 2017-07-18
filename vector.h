@@ -106,6 +106,10 @@ public:
 		{
 			return multiply(1.0f / length);
 		}
+		else
+		{
+			return *this;
+		}
 	}
 
 	vector<SIZE> operator+(vector<SIZE>& other)

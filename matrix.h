@@ -54,6 +54,56 @@ public:
 		}
 	}
 
+	vector<COLUMNS> get_row(int ind)
+	{
+		if (ind < 0 || ind >= ROWS)
+		{
+			throw std::out_of_range("Index is out of range.");
+		}
+
+		return raw[ind];
+	}
+
+	void set_row(vector<COLUMNS>& row, int ind)
+	{
+		if (ind < 0 || ind >= ROWS)
+		{
+			throw std::out_of_range("Index is out of range.");
+		}
+
+		raw[ind] = row;
+	}
+
+	vector<ROWS> get_column(int ind)
+	{
+		if (ind < 0 || ind >= COLUMNS)
+		{
+			throw std::out_of_range("Index is out of range.");
+		}
+
+		vector<ROWS> res;
+
+		for (int i = 0; i < ROWS; i++)
+		{
+			res[i] = raw[i][ind];
+		}
+
+		return res;
+	}
+
+	void set_column(vector<ROWS>& column, int ind)
+	{
+		if (ind < 0 || ind >= COLUMNS)
+		{
+			throw std::out_of_range("Index is out of range.");
+		}
+
+		for (int i = 0; i < ROWS; i++)
+		{
+			raw[i][ind] = column[i];
+		}
+	}
+
 	vector<ROWS> multiply(vector<COLUMNS>& other)
 	{
 		vector<ROWS> res;

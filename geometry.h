@@ -11,11 +11,11 @@ class geometry
 {
 public:
 	//Вычисляет барицетрические координаты точки в треугольнике.
-	static vec3 barycentric(vec3& v1, vec3& v2, vec3& v3, vec3& p)
+	static vec3 barycentric(matrix3& vert, vec3& p)
 	{
-		vec3 a = { v2[0] - v1[0], v3[0] - v1[0], v1[0] - p[0] };
-		vec3 b = { v2[1] - v1[1], v3[1] - v1[1], v1[1] - p[1] };
-		vec3 cross = vec3::cross_product(a, b);
+		vec3 x = { vert[1][0] - vert[0][0], vert[2][0] - vert[0][0], vert[0][0] - p[0] };
+		vec3 y = { vert[1][1] - vert[0][1], vert[2][1] - vert[0][1], vert[0][1] - p[1] };
+		vec3 cross = vec3::cross_product(x, y);
 
 		return vec3({ 1.0f - (cross[0] + cross[1]) / cross[2], cross[0] / cross[2], cross[1] / cross[2] });
 	}

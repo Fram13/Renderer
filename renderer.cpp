@@ -1,28 +1,29 @@
 #include "renderer.h"
 
-float min(float a, float b)
-{
-	return a < b ? a : b;
-}
+matrix4 renderer::viewport = matrix4::identity();
+matrix4 renderer::projection = matrix4::identity();
+matrix4 renderer::view = matrix4::identity();
+matrix4 renderer::transform = matrix4::identity();
+vec3 renderer::light = { 0.0f, 0.0f, -1.0f };
 
-float max(float a, float b)
-{
-	return a > b ? a : b;
-}
+const int renderer::DEPTH = 200;
+int renderer::width = 0;
+int renderer::height = 0;
+int** renderer::zbuffer = nullptr;
+float renderer::distance = -1.0f;
+TGAImage* renderer::frame = nullptr;
 
-renderer::renderer(int width, int height, fragment_shader* shader)
+void renderer::set_viewport(int w, int h)
 {
-	//Инициализация кадра
+	width = w;
+	height = h;
 	frame = new TGAImage(width, height, TGAImage::RGB);
-	this->width = width;
-	this->height = height;
 
 	viewport[0][0] = viewport[0][3] = width / 2.0f;
 	viewport[1][1] = viewport[1][3] = height / 2.0f;
 	viewport[2][2] = viewport[2][3] = DEPTH / 2.0f;
 	viewport[3][3] = 1.0f;
 
-	//Инициализация буфера глубины
 	zbuffer = new int*[height];
 
 	for (int i = 0; i < height; i++)
@@ -31,28 +32,96 @@ renderer::renderer(int width, int height, fragment_shader* shader)
 
 		for (int j = 0; j < width; j++)
 		{
-			zbuffer[i][j] = numeric_limits<int>::min();
-			frame->set(i, j, TGAColor(255, 255, 255, 255));
+			zbuffer[i][j] = std::numeric_limits<int>::min();
+
+			//background color
+			frame->set(i, j, TGAColor(155, 155, 155, 255));
 		}
 	}
-
-	//Инициализация матрицы проекции (ортогональная проекция по умолчанию)
-	projection = matrix4::identity();
-	distance = -1.0f;
-
-	//Инициализация видовой матрицы
-	view = matrix4::identity();
-	M = matrix4::identity();
-
-	//Инициализация фрагментного шейдера
-	this->shader = shader;
 }
 
-renderer::~renderer()
+void renderer::set_view(vec3& center, vec3& camera, vec3& up)
+{
+	vec3 z = (camera - center).normalize();
+	vec3 x = vec3::cross_product(up, z).normalize();
+	vec3 y = vec3::cross_product(z, x).normalize();
+
+	matrix4 M = { vec3::embed_vector(x), vec3::embed_vector(y), vec3::embed_vector(z), vec4({ 0.0f, 0.0f, 0.0f, 1.0f }) };
+	matrix4 T = matrix4::identity();
+	T.set_column(vec3::embed_point(center * -1.0f), 3);
+
+	view = M.inverse() * T;
+	transform = M.transponse().inverse();
+	set_light(light * -1.0f);
+
+	distance = (camera - center).norm();
+	projection[3][2] = -1.0f / distance;
+}
+
+void renderer::set_light(vec3& l)
+{
+	light = vec4::project(transform * vec3::embed_vector(l.normalize() * -1.0f));
+}
+
+void renderer::render_model(wavefront_model& model, shader*shdr)
+{
+	int faces = model.faces_num();
+
+	for (int i = 0; i < faces; i++)
+	{
+		render_face(model, i, shdr);
+	}
+}
+
+TGAImage& renderer::get_frame()
+{
+	return *frame;
+}
+
+void renderer::render_face(wavefront_model& model, int face_ind, shader* shdr)
+{
+	matrix3 vert = shdr->vertex(model, face_ind).transponse();
+
+	if (!(vec3::cross_product(vert[1] - vert[0], vert[2] - vert[0]).normalize()[2] > 0.0f))
+	{
+		return;
+	}
+
+	int min_x = (int)std::max(0.0f, std::min(vert[0][0], std::min(vert[1][0], vert[2][0])));
+	int max_x = (int)std::min((float)(width - 1), std::max(vert[0][0], std::max(vert[1][0], vert[2][0])));
+	int min_y = (int)std::max(0.0f, std::min(vert[0][1], std::min(vert[1][1], vert[2][1])));
+	int max_y = (int)std::min((float)(height - 1), std::max(vert[0][1], std::max(vert[1][1], vert[2][1])));
+
+	for (int x = min_x; x <= max_x; x++)
+	{
+		for (int y = min_y; y <= max_y; y++)
+		{
+			vec3 b_s = geometry::barycentric(vert, vec3({ (float)x, (float)y, 1.0f }));
+
+			if (b_s[0] < 0.0f || b_s[0] > 1.0f || b_s[1] < 0.0f || b_s[1] > 1.0f || b_s[2] < 0.0f || b_s[2] > 1.0f)
+			{
+				continue;
+			}
+
+			vec3 b_g = geometry::global_barycentric(b_s, vert, projection[3][2]);
+
+			int z = (int)(b_g[0] * vert[0][2] + b_g[1] * vert[1][2] + b_g[2] * vert[2][2]);
+
+			if (zbuffer[x][y] < z)
+			{
+				zbuffer[x][y] = z;
+				frame->set(x, y, shdr->fragment(model, b_g));
+			}
+		}
+	}
+}
+
+void renderer::dispose()
 {
 	if (frame != nullptr)
 	{
 		delete frame;
+		frame = nullptr;
 	}
 
 	if (zbuffer != nullptr)
@@ -63,111 +132,6 @@ renderer::~renderer()
 		}
 
 		delete[] zbuffer;
+		zbuffer = nullptr;
 	}
-}
-
-void renderer::render_model(model& m)
-{
-	vector<face> faces = m.get_faces();
-	vector<vec3> vertices = m.get_vertices();
-	vector<vec3> texture_vertices = m.get_texture_vertices();
-	vector<vec3> normals = m.get_normals();
-	TGAImage texture = m.get_texture();
-
-	texture_viewport[0][0] = texture.get_width();
-	texture_viewport[1][1] = texture.get_height();
-	texture_viewport[1][3] = -texture_viewport[1][1];
-
-	for (auto i = faces.begin(); i != faces.end(); i++)
-	{
-		render_face(vertices[i->v[0]], vertices[i->v[1]], vertices[i->v[2]],
-					texture_vertices[i->vt[0]], texture_vertices[i->vt[1]], texture_vertices[i->vt[2]],
-					normals[i->vn[0]], normals[i->vn[1]], normals[i->vn[2]],
-					texture);
-	}
-}
-
-void renderer::set_view(vec3& center, vec3& camera, vec3& up)
-{
-	vec3 z = (camera - center).normalize();
-	vec3 x = (up ^ z).normalize();
-	vec3 y = (z ^ x).normalize();
-
-	matrix4 M_inv = matrix4::identity();
-	M_inv[0] = vec4(x[0], x[1], x[2], 0.0f);
-	M_inv[1] = vec4(y[0], y[1], y[2], 0.0f);
-	M_inv[2] = vec4(z[0], z[1], z[2], 0.0f);
-
-	matrix4 transponse = matrix4::identity();
-	transponse[0][3] = -center[0];
-	transponse[1][3] = -center[1];
-	transponse[2][3] = -center[2];
-
-	view = M_inv * transponse;
-
-	distance = (camera - center).norm();
-	projection[3][2] = -1.0f / distance;
-
-	M = M_inv.transponse();
-}
-
-void renderer::set_light(vec3& light)
-{
-	this->light = geometry::to_3d(M * vec4(light.x, light.y, light.z, 0.0f));
-}
-
-TGAImage& renderer::get_frame()
-{
-	return *frame;
-}
-
-void renderer::render_face(vec3& v1, vec3& v2, vec3& v3, vec3& vt1, vec3& vt2, vec3& vt3, vec3& vn1, vec3& vn2, vec3& vn3, TGAImage& texture)
-{
-	vec3 vs1 = vertex_shader(v1);
-	vec3 vs2 = vertex_shader(v2);
-	vec3 vs3 = vertex_shader(v3);
-
-	if (!(((vs2 - vs1) ^ (vs3 - vs1)) * vec3(0.0f, 0.0f, -1.0f) < 0.0f))
-	{
-		return;
-	}
-
-	int x1 = (int)min(vs1.x, min(vs2.x, vs3.x));
-	int x2 = (int)max(vs1.x, max(vs2.x, vs3.x));
-
-	int y1 = (int)min(vs1.y, min(vs2.y, vs3.y));
-	int y2 = (int)max(vs1.y, max(vs2.y, vs3.y));
-
-	for (int x = x1; x <= x2; x++)
-	{
-		for (int y = y1; y <= y2; y++)
-		{
-			if (x < 0 || x >= width || y < 0 || y >= height)
-			{
-				continue;
-			}
-
-			vec3 b_s = geometry::barycentric_coords(vs1, vs2, vs3, vec3(x, y, 1.0f));
-
-			if (b_s.x < 0.0f || b_s.x > 1.0f || b_s.y < 0.0f || b_s.y > 1.0f || b_s.z < 0.0f || b_s.z > 1.0f)
-			{
-				continue;
-			}
-
-			vec3 vz(v1.z, v2.z, v3.z);
-			vec3 b_g = geometry::global_barycentric_coords(b_s, vz, projection[3][2]);
-			int z = (int)(vec3(vs1.z, vs2.z, vs3.z) * b_g);
-
-			if (z > zbuffer[x][y])
-			{
-				zbuffer[x][y] = z;
-				frame->set(x, y, shader->fragment(b_g, vt1, vt2, vt3, vn1, vn2, vn3, texture, light));
-			}
-		}
-	}
-}
-
-vec3 renderer::vertex_shader(vec3& vec)
-{
-	return geometry::to_3d(viewport * projection * view * geometry::to_4d(vec));
 }
