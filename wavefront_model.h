@@ -16,8 +16,10 @@ public:
 	vec3 texture_vertex(int ind);
 	vec3 normal(int ind);
 
-	TGAColor get_texture(vec3& coords);
-	TGAColor get_normal(vec3& coords);
+	TGAColor texture_map(vec3& coords);
+	TGAColor normal_map(vec3& coords);
+	TGAColor normal_tangent_map(vec3& coords);
+	TGAColor specular_map(vec3& coords);
 
 	int map_width();
 	int map_height();
@@ -30,10 +32,12 @@ private:
 	std::vector<vec3> texture_vertices;
 	std::vector<vec3> normals;
 
-	TGAImage* texture_map;
-	TGAImage* normal_map;
+	TGAImage* _texture_map;
+	TGAImage* _normal_map;
+	TGAImage* _normal_tangent_map;
+	TGAImage* _specular_map;
 
-	matrix4 model;
+	//matrix4 model;
 
 	void read_obj_file(std::string path);
 	TGAImage* load_map(std::string path);

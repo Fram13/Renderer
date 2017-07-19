@@ -2,23 +2,38 @@
 
 wavefront_model::wavefront_model(std::string path)
 {
-	read_obj_file(path + "\\model.obj");
-	texture_map = load_map(path + "\\texture_map.tga");
-	normal_map = load_map(path + "\\normal_map.tga");
+	read_obj_file(path);
+	std::string name = path.replace(path.length() - 4, 4, "");
+	_texture_map = load_map(name + "_diffuse.tga");
+	_normal_map = load_map(name + "_nm.tga");
+	_normal_tangent_map = load_map(name + "_nm_tangent.tga");
+	_specular_map = load_map(name + "_spec.tga");
 }
 
 wavefront_model::~wavefront_model()
 {
-	if (texture_map != nullptr)
+	if (_texture_map != nullptr)
 	{
-		delete texture_map;
-		texture_map = nullptr;
+		delete _texture_map;
+		_texture_map = nullptr;
 	}
 
-	if (normal_map != nullptr)
+	if (_normal_map != nullptr)
 	{
-		delete normal_map;
-		normal_map = nullptr;
+		delete _normal_map;
+		_normal_map = nullptr;
+	}
+
+	if (_normal_tangent_map != nullptr)
+	{
+		delete _normal_tangent_map;
+		_normal_tangent_map = nullptr;
+	}
+
+	if (_specular_map != nullptr)
+	{
+		delete _specular_map;
+		_specular_map = nullptr;
 	}
 }
 
@@ -42,24 +57,34 @@ vec3 wavefront_model::normal(int ind)
 	return normals[ind];
 }
 
-TGAColor wavefront_model::get_texture(vec3& coords)
+TGAColor wavefront_model::texture_map(vec3& coords)
 {
-	return texture_map->get((int)coords[0], (int)coords[1]);
+	return _texture_map->get((int)coords[0], (int)coords[1]);
 }
 
-TGAColor wavefront_model::get_normal(vec3& coords)
+TGAColor wavefront_model::normal_map(vec3& coords)
 {
-	return normal_map->get((int)coords[0], (int)coords[1]);
+	return _normal_map->get((int)coords[0], (int)coords[1]);
+}
+
+TGAColor wavefront_model::normal_tangent_map(vec3& coords)
+{
+	return _normal_tangent_map->get((int)coords[0], (int)coords[1]);
+}
+
+TGAColor wavefront_model::specular_map(vec3& coords)
+{
+	return _specular_map->get((int)coords[0], (int)coords[1]);
 }
 
 int wavefront_model::map_width()
 {
-	return texture_map->get_width();
+	return _texture_map->get_width();
 }
 
 int wavefront_model::map_height()
 {
-	return texture_map->get_height();
+	return _texture_map->get_height();
 }
 
 int wavefront_model::faces_num()
