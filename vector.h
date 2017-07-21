@@ -5,210 +5,218 @@
 #include <stdexcept>
 #include <math.h>
 
-template <int SIZE>
-class vector
+namespace graphics
 {
-public:
-	static_assert(SIZE > 1, "Vector size must be greater than one (at vector<SIZE>)");
-
-	vector()
+	template <int SIZE>
+	class vector
 	{
-		for (int i = 0; i < SIZE; i++)
-		{
-			raw[i] = 0.0f;
-		}
-	}
+	public:
+		static_assert(SIZE > 1, "Vector size must be greater than one (at vector<SIZE>)");
 
-	vector(std::initializer_list<float> init_list)
-	{
-		auto iter = init_list.begin();
-		int i = 0;
-
-		while (i < SIZE && iter != init_list.end())
+		vector()
 		{
-			raw[i] = *iter;
-			i++;
-			iter++;
+			for (int i = 0; i < SIZE; i++)
+			{
+				raw[i] = 0.0f;
+			}
 		}
 
-		while (i < SIZE)
+		vector(std::initializer_list<float> init_list)
 		{
-			raw[i] = 0.0f;
-			i++;
-		}
-	}
+			auto iter = init_list.begin();
+			int i = 0;
 
-	vector<SIZE> add(vector<SIZE>& other)
-	{
-		vector<SIZE> res;
+			while (i < SIZE && iter != init_list.end())
+			{
+				raw[i] = *iter;
+				i++;
+				iter++;
+			}
 
-		for (int i = 0; i < SIZE; i++)
-		{
-			res[i] = raw[i] + other[i];
-		}
-
-		return res;
-	}
-
-	vector<SIZE> subtract(vector<SIZE>& other)
-	{
-		vector<SIZE> res;
-
-		for (int i = 0; i < SIZE; i++)
-		{
-			res[i] = raw[i] - other[i];
+			while (i < SIZE)
+			{
+				raw[i] = 0.0f;
+				i++;
+			}
 		}
 
-		return res;
-	}
-
-	vector<SIZE> multiply(float scalar)
-	{
-		vector<SIZE> res;
-
-		for (int i = 0; i < SIZE; i++)
+		vector<SIZE> add(vector<SIZE>& other)
 		{
-			res[i] = raw[i] * scalar;
+			vector<SIZE> res;
+
+			for (int i = 0; i < SIZE; i++)
+			{
+				res[i] = raw[i] + other[i];
+			}
+
+			return res;
 		}
 
-		return res;
-	}
-
-	float dot_product(vector<SIZE>& other)
-	{
-		float res = 0.0f;
-
-		for (int i = 0; i < SIZE; i++)
+		vector<SIZE> subtract(vector<SIZE>& other)
 		{
-			res += raw[i] * other[i];
+			vector<SIZE> res;
+
+			for (int i = 0; i < SIZE; i++)
+			{
+				res[i] = raw[i] - other[i];
+			}
+
+			return res;
 		}
 
-		return res;
-	}
-
-	float norm()
-	{
-		float res = 0.0f;
-
-		for (int i = 0; i < SIZE; i++)
+		vector<SIZE> multiply(float scalar)
 		{
-			res += raw[i] * raw[i];
+			vector<SIZE> res;
+
+			for (int i = 0; i < SIZE; i++)
+			{
+				res[i] = raw[i] * scalar;
+			}
+
+			return res;
 		}
 
-		return sqrt(res);
-	}
-
-	vector<SIZE> normalize()
-	{
-		float length = norm();
-
-		if (length > E)
+		float dot_product(vector<SIZE>& other)
 		{
-			return multiply(1.0f / length);
+			float res = 0.0f;
+
+			for (int i = 0; i < SIZE; i++)
+			{
+				res += raw[i] * other[i];
+			}
+
+			return res;
 		}
-		else
+
+		float norm()
 		{
+			float res = 0.0f;
+
+			for (int i = 0; i < SIZE; i++)
+			{
+				res += raw[i] * raw[i];
+			}
+
+			return sqrt(res);
+		}
+
+		vector<SIZE> normalize()
+		{
+			float length = norm();
+
+			if (length > E)
+			{
+				return multiply(1.0f / length);
+			}
+			else
+			{
+				return *this;
+			}
+		}
+
+		vector<SIZE> operator+(vector<SIZE>& other)
+		{
+			return add(other);
+		}
+
+		vector<SIZE> operator-()
+		{
+			return multiply(-1.0f);
+		}
+
+		vector<SIZE> operator-(vector<SIZE>& other)
+		{
+			return subtract(other);
+		}
+
+		vector<SIZE> operator*(float scalar)
+		{
+			return multiply(scalar);
+		}
+
+		float operator*(vector<SIZE>& other)
+		{
+			return dot_product(other);
+		}
+
+		float& operator[](int ind)
+		{
+			if (ind < 0 || ind >= SIZE)
+			{
+				throw std::out_of_range("Index is out of range.");
+			}
+
+			return raw[ind];
+		}
+
+		vector<SIZE>& operator=(vector<SIZE>& other)
+		{
+			for (int i = 0; i < SIZE; i++)
+			{
+				raw[i] = other[i];
+			}
+
 			return *this;
 		}
+
+		static vector<SIZE + 1> embed_point(vector<SIZE>& vec);
+
+		static vector<SIZE + 1> embed_vector(vector<SIZE>& vec);
+
+		static vector<SIZE - 1> project(vector<SIZE>& vec);
+
+		static vector<SIZE> cross_product(vector<SIZE>& vec1, vector<SIZE>& vec2);
+
+	private:
+		float raw[SIZE];
+		static const float E;
+	};
+
+	template <int SIZE>
+	const float vector<SIZE>::E = 1e-6f;
+
+	template <int SIZE>
+	vector<SIZE + 1> vector<SIZE>::embed_point(vector<SIZE>& vec)
+	{
+		vector<SIZE + 1> res = vector<SIZE>::embed_vector(vec);
+
+		res[SIZE] = 1.0f;
+
+		return res;
 	}
 
-	vector<SIZE> operator+(vector<SIZE>& other)
+	template <int SIZE>
+	vector<SIZE + 1> vector<SIZE>::embed_vector(vector<SIZE>& vec)
 	{
-		return add(other);
-	}
+		vector<SIZE + 1> res;
 
-	vector<SIZE> operator-(vector<SIZE>& other)
-	{
-		return subtract(other);
-	}
-
-	vector<SIZE> operator*(float scalar)
-	{
-		return multiply(scalar);
-	}
-
-	float operator*(vector<SIZE>& other)
-	{
-		return dot_product(other);
-	}
-	
-	float& operator[](int ind)
-	{
-		if (ind < 0 || ind >= SIZE)
-		{
-			throw std::out_of_range("Index is out of range.");
-		}
-
-		return raw[ind];
-	}
-
-	vector<SIZE>& operator=(vector<SIZE>& other)
-	{
 		for (int i = 0; i < SIZE; i++)
 		{
-			raw[i] = other[i];
+			res[i] = vec[i];
 		}
 
-		return *this;
+		return res;
 	}
 
-	static vector<SIZE + 1> embed_point(vector<SIZE>& vec);
-
-	static vector<SIZE + 1> embed_vector(vector<SIZE>& vec);
-
-	static vector<SIZE - 1> project(vector<SIZE>& vec);
-
-	static vector<SIZE> cross_product(vector<SIZE>& vec1, vector<SIZE>& vec2);
-
-private:
-	float raw[SIZE];
-	static const float E;
-};
-
-template <int SIZE>
-const float vector<SIZE>::E = 1e-6f;
-
-template <int SIZE>
-vector<SIZE + 1> vector<SIZE>::embed_point(vector<SIZE>& vec)
-{
-	vector<SIZE + 1> res = vector<SIZE>::embed_vector(vec);
-
-	res[SIZE] = 1.0f;
-
-	return res;
-}
-
-template <int SIZE>
-vector<SIZE + 1> vector<SIZE>::embed_vector(vector<SIZE>& vec)
-{
-	vector<SIZE + 1> res;
-
-	for (int i = 0; i < SIZE; i++)
+	template <int SIZE>
+	vector<SIZE - 1> vector<SIZE>::project(vector<SIZE>& vec)
 	{
-		res[i] = vec[i];
+		vector<SIZE - 1> res;
+		float m = abs(vec[SIZE - 1]) > vector<SIZE>::E ? vec[SIZE - 1] : 1.0f;
+
+		for (int i = 0; i < SIZE - 1; i++)
+		{
+			res[i] = vec[i] / m;
+		}
+
+		return res;
 	}
 
-	return res;
-}
-
-template <int SIZE>
-vector<SIZE - 1> vector<SIZE>::project(vector<SIZE>& vec)
-{
-	vector<SIZE - 1> res;
-	float multiplier = abs(vec[SIZE - 1]) > vector<SIZE>::E ? vec[SIZE - 1] : 1.0f;
-
-	for (int i = 0; i < SIZE - 1; i++)
+	template <int SIZE>
+	vector<SIZE> vector<SIZE>::cross_product(vector<SIZE>& vec1, vector<SIZE>& vec2)
 	{
-		res[i] = vec[i] / multiplier;
+		static_assert(SIZE == 3, "Cross product can only be computed in a three-dimensional space (at vector<SIZE>::cross_product(vector<SIZE>& vec1, vector<SIZE>& vec2))");
+
+		return vector<SIZE>({ vec1[1] * vec2[2] - vec2[1] * vec1[2], -(vec1[0] * vec2[2] - vec2[0] * vec1[2]), vec1[0] * vec2[1] - vec2[0] * vec1[1] });
 	}
-
-	return res;
-}
-
-template <int SIZE>
-vector<SIZE> vector<SIZE>::cross_product(vector<SIZE>& vec1, vector<SIZE>& vec2)
-{
-	static_assert(SIZE == 3, "Cross product can only be computed in a three-dimensional space (at vector<SIZE>::cross_product(vector<SIZE>& vec1, vector<SIZE>& vec2))");
-
-	return vector<SIZE>({ vec1[1] * vec2[2] - vec2[1] * vec1[2], -(vec1[0] * vec2[2] - vec2[0] * vec1[2]), vec1[0] * vec2[1] - vec2[0] * vec1[1] });
 }

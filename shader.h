@@ -2,9 +2,12 @@
 
 #include "renderer.h"
 
-class shader
+namespace graphics
 {
-public:
-	virtual matrix3 vertex(wavefront_model& m, int face_ind) = 0;
-	virtual TGAColor fragment(wavefront_model& model, vec3& barycentric) = 0;
-};
+	class shader
+	{
+	public:
+		virtual vec3 vertex(wavefront_model& model, int face_ind, int vert_ind) = 0;
+		virtual TGAColor fragment(wavefront_model& model, vec3& barycentric) = 0;
+	};
+}

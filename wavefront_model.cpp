@@ -1,4 +1,5 @@
 #include "wavefront_model.h"
+using namespace graphics;
 
 wavefront_model::wavefront_model(std::string path)
 {
@@ -59,32 +60,36 @@ vec3 wavefront_model::normal(int ind)
 
 TGAColor wavefront_model::texture_map(vec3& coords)
 {
-	return _texture_map->get((int)coords[0], (int)coords[1]);
+	int x = (int)(coords[0] * _texture_map->get_width());
+	int y = (int)(_texture_map->get_height() - coords[1] * _texture_map->get_height());
+
+	return _texture_map->get(x, y);
 }
 
-TGAColor wavefront_model::normal_map(vec3& coords)
+vec3 wavefront_model::normal_map(vec3& coords)
 {
-	return _normal_map->get((int)coords[0], (int)coords[1]);
+	int x = (int)(coords[0] * _normal_map->get_width());
+	int y = (int)(_normal_map->get_height() - coords[1] * _normal_map->get_height());
+
+	TGAColor color = _normal_map->get(x, y);
+	return vec3({ color.r - 127.0f, color.g - 127.0f, color.b - 127.0f }).normalize();
 }
 
-TGAColor wavefront_model::normal_tangent_map(vec3& coords)
+vec3 wavefront_model::normal_tangent_map(vec3& coords)
 {
-	return _normal_tangent_map->get((int)coords[0], (int)coords[1]);
+	int x = (int)(coords[0] * _normal_tangent_map->get_width());
+	int y = (int)(_normal_tangent_map->get_height() - coords[1] * _normal_tangent_map->get_height());
+
+	TGAColor color = _normal_tangent_map->get(x, y);
+	return vec3({ color.r - 127.0f, color.g - 127.0f, color.b - 127.0f }).normalize();
 }
 
-TGAColor wavefront_model::specular_map(vec3& coords)
+float wavefront_model::specular_map(vec3& coords)
 {
-	return _specular_map->get((int)coords[0], (int)coords[1]);
-}
+	int x = (int)(coords[0] * _specular_map->get_width());
+	int y = (int)(_specular_map->get_height() - coords[1] * _specular_map->get_height());
 
-int wavefront_model::map_width()
-{
-	return _texture_map->get_width();
-}
-
-int wavefront_model::map_height()
-{
-	return _texture_map->get_height();
+	return _specular_map->get(x, y).r;
 }
 
 int wavefront_model::faces_num()
