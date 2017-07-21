@@ -14,6 +14,8 @@ TGAImage* renderer::frame = nullptr;
 
 void renderer::set_viewport(int width, int height)
 {
+	dispose();
+
 	renderer::width = width;
 	renderer::height = height;
 	frame = new TGAImage(width, height, TGAImage::RGB);
@@ -56,7 +58,19 @@ void renderer::set_view(vec3& center, vec3& camera, vec3& up)
 
 void renderer::set_light(vec3& light)
 {
-	renderer::light = vec4::project((projection * view).transponse().inverse() * vec3::embed_vector(-light.normalize()));
+	renderer::light = (vec4::project((projection * view).transponse().inverse() * vec3::embed_vector(-light))).normalize();
+}
+
+void renderer::clear()
+{
+	for (int i = 0; i < height; i++)
+	{
+		for (int j = 0; j < width; j++)
+		{
+			zbuffer[i][j] = std::numeric_limits<int>::min();
+			frame->set(i, j, TGAColor(155, 155, 155, 255));
+		}
+	}
 }
 
 void renderer::render_model(wavefront_model& model, shader*shdr)

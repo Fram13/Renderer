@@ -15,6 +15,7 @@ namespace graphics
 		static void set_viewport(int width, int height);
 		static void set_view(vec3& center, vec3& camera, vec3& up);
 		static void set_light(vec3& light);
+		static void clear();
 
 		static void render_model(wavefront_model& model, shader* shdr);
 
