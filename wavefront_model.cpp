@@ -118,7 +118,7 @@ void wavefront_model::read_obj_file(std::string path)
 
 			if (s == 't')
 			{
-				texture_vertices.push_back(vec3({ x, y, 1.0f }));
+				texture_vertices.push_back(vec3({ x, y, z }));
 			}
 			else if (s == 'n')
 			{
