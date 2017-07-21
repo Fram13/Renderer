@@ -1,11 +1,13 @@
 #pragma once
 
-#include "geometry.h"
-#include "tgaimage.h"
+#include "renderer.h"
 
-class shader
+namespace graphics
 {
-public:
-	virtual vec3 vertex(vec3& p) = 0;
-	virtual TGAColor fragment(vec3& barycentric_coords) = 0;
-};
+	class shader
+	{
+	public:
+		virtual vec3 vertex(wavefront_model& model, int face_ind, int vert_ind) = 0;
+		virtual TGAColor fragment(wavefront_model& model, vec3& barycentric) = 0;
+	};
+}
