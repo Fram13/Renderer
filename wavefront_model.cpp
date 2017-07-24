@@ -88,8 +88,9 @@ float wavefront_model::specular_map(vec3& coords)
 {
 	int x = (int)(coords[0] * _specular_map->get_width());
 	int y = (int)(_specular_map->get_height() - coords[1] * _specular_map->get_height());
+	unsigned char exp = _specular_map->get(x, y).r;
 
-	return _specular_map->get(x, y).r;
+	return exp > 0 ? exp : exp + 1;
 }
 
 int wavefront_model::faces_num()
