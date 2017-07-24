@@ -25,6 +25,10 @@ namespace graphics
 
 		int faces_num();
 
+		//void rotate(float angle, vec3& vec);
+		void scale(vec3& vec);
+		void translate(vec3& vec);
+
 	private:
 		std::vector<face> faces;
 		std::vector<vec3> vertices;
@@ -36,13 +40,7 @@ namespace graphics
 		TGAImage* _normal_tangent_map;
 		TGAImage* _specular_map;
 
-		//matrix4 model;
-
 		void read_obj_file(std::string path);
 		TGAImage* load_map(std::string path);
-
-		/*void rotate(float angle, vec3& vec);
-		void scale(vec3& vec);
-		void translate(vec3& vec);*/
 	};
 }

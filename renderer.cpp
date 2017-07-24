@@ -61,18 +61,6 @@ void renderer::set_light(vec3& light)
 	renderer::light = (vec4::project((projection * view).transponse().inverse() * vec3::embed_vector(-light))).normalize();
 }
 
-void renderer::clear()
-{
-	for (int i = 0; i < height; i++)
-	{
-		for (int j = 0; j < width; j++)
-		{
-			zbuffer[i][j] = std::numeric_limits<int>::min();
-			frame->set(i, j, TGAColor(155, 155, 155, 255));
-		}
-	}
-}
-
 void renderer::render_model(wavefront_model& model, shader*shdr)
 {
 	int faces = model.faces_num();
@@ -90,35 +78,42 @@ TGAImage& renderer::get_frame()
 
 void renderer::render_face(wavefront_model& model, int face_ind, shader* shdr)
 {
-	matrix3 vert = { shdr->vertex(model, face_ind, 0), shdr->vertex(model, face_ind, 1), shdr->vertex(model, face_ind, 2) };
+	matrix<4, 3> vert4 = { shdr->vertex(model, face_ind, 0), shdr->vertex(model, face_ind, 1), shdr->vertex(model, face_ind, 2) };
 
-	vec3 a = vert.get_column(1) - vert.get_column(0);
-	vec3 b = vert.get_column(2) - vert.get_column(0);
+	matrix3 scrn_vert;
+	scrn_vert.set_column(vec4::project(viewport * vert4.get_column(0)), 0);
+	scrn_vert.set_column(vec4::project(viewport * vert4.get_column(1)), 1);
+	scrn_vert.set_column(vec4::project(viewport * vert4.get_column(2)), 2);
+
+	vec3 a = scrn_vert.get_column(1) - scrn_vert.get_column(0);
+	vec3 b = scrn_vert.get_column(2) - scrn_vert.get_column(0);
 
 	if (!(vec3::cross_product(a, b).normalize()[2] > 0.0f))
 	{
 		return;
 	}
 
-	int min_x = (int)std::max(0.0f, std::min(vert[0][0], std::min(vert[0][1], vert[0][2])));
-	int max_x = (int)std::min((float)(width - 1), std::max(vert[0][0], std::max(vert[0][1], vert[0][2])));
-	int min_y = (int)std::max(0.0f, std::min(vert[1][0], std::min(vert[1][1], vert[1][2])));
-	int max_y = (int)std::min((float)(height - 1), std::max(vert[1][0], std::max(vert[1][1], vert[1][2])));
+	int min_x = (int)std::max(0.0f, std::min(scrn_vert[0][0], std::min(scrn_vert[0][1], scrn_vert[0][2])));
+	int max_x = (int)std::min((float)(width - 1), std::max(scrn_vert[0][0], std::max(scrn_vert[0][1], scrn_vert[0][2])));
+	int min_y = (int)std::max(0.0f, std::min(scrn_vert[1][0], std::min(scrn_vert[1][1], scrn_vert[1][2])));
+	int max_y = (int)std::min((float)(height - 1), std::max(scrn_vert[1][0], std::max(scrn_vert[1][1], scrn_vert[1][2])));
 
 	for (int x = min_x; x <= max_x; x++)
 	{
 		for (int y = min_y; y <= max_y; y++)
 		{
-			vec3 b_s = geometry::barycentric(vert, vec3({ (float)x, (float)y, 1.0f }));
+			vec3 b_s = geometry::barycentric(scrn_vert, vec3({ (float)x, (float)y, 1.0f }));
 
 			if (b_s[0] < 0.0f || b_s[0] > 1.0f || b_s[1] < 0.0f || b_s[1] > 1.0f || b_s[2] < 0.0f || b_s[2] > 1.0f)
 			{
 				continue;
 			}
 
-			vec3 b_g = geometry::global_barycentric(b_s, vert, projection[3][2]);
+			vec3 b_g = { b_s[0] / vert4[3][0], b_s[1] / vert4[3][1], b_s[2] / vert4[3][2] };
+			float m = 1.0f / (b_g[0] + b_g[1] + b_g[2]);
+			b_g = b_g * m;
 
-			int z = (int)(vert.get_row(2) * b_g);
+			int z = (int)((m - 1.0f) / projection[3][2] * DEPTH / 2.0f + DEPTH / 2.0f);
 
 			if (zbuffer[x][y] < z)
 			{

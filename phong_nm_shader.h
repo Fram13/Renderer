@@ -10,13 +10,12 @@ namespace graphics
 		matrix3 vt;
 
 	public:
-		virtual vec3 vertex(wavefront_model& model, int face_ind, int vert_ind) override
+		virtual vec4 vertex(wavefront_model& model, int face_ind, int vert_ind) override
 		{
 			face f = model.get_face(face_ind);
 			vt.set_column(model.texture_vertex(f.vt[vert_ind]), vert_ind);
 
-			vec4 v = vec3::embed_point(model.vertex(f.v[vert_ind]));
-			return vec4::project(renderer::viewport * renderer::projection * renderer::view * v);
+			return renderer::projection * renderer::view * vec3::embed_point(model.vertex(f.v[vert_ind]));
 		}
 
 		virtual TGAColor fragment(wavefront_model& m, vec3& bar) override

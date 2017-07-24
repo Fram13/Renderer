@@ -12,7 +12,7 @@ namespace graphics
 		matrix3 vn;
 
 	public:
-		virtual vec3 vertex(wavefront_model& model, int face_ind, int vert_ind)
+		virtual vec4 vertex(wavefront_model& model, int face_ind, int vert_ind)
 		{
 			face f = model.get_face(face_ind);
 
@@ -26,7 +26,7 @@ namespace graphics
 			vn4 = (renderer::projection * renderer::view).transponse().inverse() * vn4;
 			vn.set_column(vec4::project(vn4), vert_ind);
 
-			return vec4::project(renderer::viewport * v4);
+			return v4;
 		}
 
 		virtual TGAColor fragment(wavefront_model& model, vec3& barycentric)
