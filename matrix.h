@@ -155,6 +155,33 @@ namespace graphics
 
 			for (int i = 0; i < ROWS; i++)
 			{
+				if (abs(matr[i][i]) < E)
+				{
+					bool inverse_exists = false;
+
+					for (int j = i + 1; j < ROWS; j++)
+					{
+						if (abs(matr[j][i]) > E)
+						{
+							vector<COLUMNS> row = matr[i];
+							matr[i] = matr[j];
+							matr[j] = row;
+
+							row = res[i];
+							res[i] = res[j];
+							res[j] = row;
+							
+							inverse_exists = true;
+							break;
+						}
+					}
+
+					if (!inverse_exists)
+					{
+						throw std::invalid_argument("Inverse matrix does not exist.");
+					}
+				}
+
 				float m = 1.0f / matr[i][i];
 				matr[i] = matr[i] * m;
 				res[i] = res[i] * m;
@@ -208,7 +235,11 @@ namespace graphics
 
 	private:
 		vector<COLUMNS> raw[ROWS];
+		static const float E;
 	};
+
+	template <int ROWS, int COLUMNS>
+	const float matrix<ROWS, COLUMNS>::E = 1e-6f;
 
 	template <int ROWS, int COLUMNS>
 	matrix<ROWS, COLUMNS> matrix<ROWS, COLUMNS>::identity()
