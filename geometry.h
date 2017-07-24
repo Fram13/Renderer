@@ -21,13 +21,5 @@ namespace graphics
 
 			return vec3({ 1.0f - (cross[0] + cross[1]) / cross[2], cross[0] / cross[2], cross[1] / cross[2] });
 		}
-
-		//Вычисляет глобальные барицентрические координаты на основе экранных барицентрических координат.
-		static vec3 global_barycentric(vec3& screen_coords, matrix3& vertices, float r)
-		{
-			vec3 rz = vertices.get_row(2) * r + vec3({ 1.0f, 1.0f, 1.0f });
-
-			return vec3({ screen_coords[0] / rz[0], screen_coords[1] / rz[1], screen_coords[2] / rz[2] }) * (1.0f / (screen_coords[0] / rz[0] + screen_coords[1] / rz[1] + screen_coords[2] / rz[2]));
-		}
 	};
 }

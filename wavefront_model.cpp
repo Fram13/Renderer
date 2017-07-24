@@ -161,3 +161,29 @@ TGAImage* wavefront_model::load_map(std::string path)
 
 	return map;
 }
+
+void wavefront_model::scale(vec3& vec)
+{
+	matrix4 m = matrix4::identity();
+	m[0][0] = vec[0];
+	m[1][1] = vec[1];
+	m[2][2] = vec[2];
+
+	for (int i = 0; i < vertices.size(); i++)
+	{
+		vertices[i] = vec4::project(m * vec3::embed_point(vertices[i]));
+	}
+}
+
+void wavefront_model::translate(vec3& vec)
+{
+	matrix4 m = matrix4::identity();
+	m[0][3] = vec[0];
+	m[1][3] = vec[1];
+	m[2][3] = vec[2];
+
+	for (int i = 0; i < vertices.size(); i++)
+	{
+		vertices[i] = vec4::project(m * vec3::embed_point(vertices[i]));
+	}
+}
