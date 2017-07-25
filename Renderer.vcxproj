@@ -112,8 +112,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="face.h" />
-    <ClInclude Include="phong_nm_shader.h" />
-    <ClInclude Include="phong_tangent_nm_shader.h" />
+    <ClInclude Include="main_shader.h" />
+    <ClInclude Include="no_shdows_shader.h" />
     <ClInclude Include="shader.h" />
     <ClInclude Include="geometry.h" />
     <ClInclude Include="matrix.h" />

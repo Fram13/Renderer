@@ -45,10 +45,10 @@
     <ClInclude Include="matrix.h">
       <Filter>Header Files\geometry</Filter>
     </ClInclude>
-    <ClInclude Include="phong_nm_shader.h">
+    <ClInclude Include="main_shader.h">
       <Filter>Header Files\shaders</Filter>
     </ClInclude>
-    <ClInclude Include="phong_tangent_nm_shader.h">
+    <ClInclude Include="no_shdows_shader.h">
       <Filter>Header Files\shaders</Filter>
     </ClInclude>
   </ItemGroup>
