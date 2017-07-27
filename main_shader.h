@@ -4,10 +4,11 @@
 
 namespace graphics
 {
-	class phong_tangent_nm_shader : public shader
+	class main_shader : public shader
 	{
 	private:
 		matrix3 v;
+		matrix3 vl;
 		matrix3 vt;
 		matrix3 vn;
 
@@ -17,6 +18,9 @@ namespace graphics
 			face f = model.get_face(face_ind);
 
 			vec4 v4 = vec3::embed_point(model.vertex(f.v[vert_ind]));
+
+			vl.set_column(vec4::project(renderer::viewport * renderer::light_view * v4), vert_ind);
+
 			v4 = renderer::projection * renderer::view * v4;
 			v.set_column(vec4::project(v4), vert_ind);
 
@@ -48,18 +52,25 @@ namespace graphics
 
 			vec3 n = (B * model.normal_tangent_map(uv)).normalize();
 			vec3 r = (n * (n * renderer::light * 2.0f) - renderer::light).normalize();
+			vec3 vert_light = vl * barycentric;
 
 			float specular = pow(std::max(0.0f, r[2]), model.specular_map(uv));
 			float diffuse = std::max(n * renderer::light, 0.0f);
 			float ambient = 5.0f;
+			float shadow = 1.0f;
+
+			if ((int)vert_light[2] < renderer::get_shadow_buffer_value((int)vert_light[0], (int)vert_light[1]))
+			{
+				shadow = 0.3f;
+			}
 
 			TGAColor color = model.texture_map(uv);
 
-			color.r = (unsigned char)std::min((ambient + color.r * (diffuse + 0.6f * specular)), 255.0f);
-			color.g = (unsigned char)std::min((ambient + color.g * (diffuse + 0.6f * specular)), 255.0f);
-			color.b = (unsigned char)std::min((ambient + color.b * (diffuse + 0.6f * specular)), 255.0f);
+			color.r = (unsigned char)std::min((ambient + color.r * shadow * (diffuse + 0.6f * specular)), 255.0f);
+			color.g = (unsigned char)std::min((ambient + color.g * shadow * (diffuse + 0.6f * specular)), 255.0f);
+			color.b = (unsigned char)std::min((ambient + color.b * shadow * (diffuse + 0.6f * specular)), 255.0f);
 
 			return color;
 		}
-	} phong_tangent_nm_shdr;
+	} main_shdr;
 }

@@ -7,6 +7,8 @@
 
 namespace graphics
 {
+	using uint = unsigned int;
+
 	template <int SIZE>
 	class vector
 	{
