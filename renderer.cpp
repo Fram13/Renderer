@@ -67,6 +67,31 @@ void renderer::set_light(vec3& light_pos)
 	light = vec4::project((projection * view).transponse().inverse() * vec3::embed_vector(-light_pos)).normalize();
 }
 
+void renderer::render_models(std::vector<wavefront_model*>& models, shader*shdr)
+{
+	set_light_view();
+
+	for (uint i = 0; i < models.size(); i++)
+	{
+		uint faces = models[i]->faces_num();
+
+		for (uint j = 0; j < faces; j++)
+		{
+			render_face_to_shadow_buffer(*(models[i]), j);
+		}
+	}
+
+	for (uint i = 0; i < models.size(); i++)
+	{
+		uint faces = models[i]->faces_num();
+
+		for (uint j = 0; j < faces; j++)
+		{
+			render_face(*(models[i]), j, shdr);
+		}
+	}
+}
+
 void renderer::render_model(wavefront_model& model, shader*shdr)
 {
 	set_light_view();
