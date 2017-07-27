@@ -11,23 +11,15 @@ namespace graphics
 		matrix3 vl;
 		matrix3 vt;
 		matrix3 vn;
-		bool light_matr_ok = false;
-		matrix4 light_view;
 
 	public:
 		virtual vec4 vertex(wavefront_model& model, int face_ind, int vert_ind)
 		{
-			if (!light_matr_ok)
-			{
-				light_view = renderer::light_view_matrix();
-				light_matr_ok = true;
-			}
-
 			face f = model.get_face(face_ind);
 
 			vec4 v4 = vec3::embed_point(model.vertex(f.v[vert_ind]));
 
-			vl.set_column(vec4::project(renderer::viewport * light_view * v4), vert_ind);
+			vl.set_column(vec4::project(renderer::viewport * renderer::light_view * v4), vert_ind);
 
 			v4 = renderer::projection * renderer::view * v4;
 			v.set_column(vec4::project(v4), vert_ind);

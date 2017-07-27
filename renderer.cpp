@@ -4,9 +4,11 @@ using namespace graphics;
 matrix4 renderer::viewport = matrix4::identity();
 matrix4 renderer::projection = matrix4::identity();
 matrix4 renderer::view = matrix4::identity();
+matrix4 renderer::light_view = matrix4::identity();
 vec3 renderer::light = { 0.0f, 0.0f, 1.0f };
 
 const int renderer::DEPTH = 200;
+const int renderer::SBUFFER_CORRECTION = 4;
 int renderer::width = 0;
 int renderer::height = 0;
 int** renderer::zbuffer = nullptr;
@@ -67,6 +69,8 @@ void renderer::set_light(vec3& light_pos)
 
 void renderer::render_model(wavefront_model& model, shader*shdr)
 {
+	set_light_view();
+
 	int faces = model.faces_num();
 
 	for (int i = 0; i < faces; i++)
@@ -135,7 +139,6 @@ void renderer::render_face(wavefront_model& model, int face_ind, shader* shdr)
 
 void renderer::render_face_to_shadow_buffer(wavefront_model& model, int face_ind)
 {
-	matrix4 light_view = light_view_matrix();
 	face f = model.get_face(face_ind);
 
 	matrix3 scrn_vert;
@@ -167,7 +170,7 @@ void renderer::render_face_to_shadow_buffer(wavefront_model& model, int face_ind
 				continue;
 			}
 
-			int z = (int)(scrn_vert.get_row(2) * b_s);
+			int z = (int)(scrn_vert.get_row(2) * b_s) - SBUFFER_CORRECTION;
 
 			if (sbuffer[x][y] < z)
 			{
@@ -177,7 +180,7 @@ void renderer::render_face_to_shadow_buffer(wavefront_model& model, int face_ind
 	}
 }
 
-matrix4 renderer::light_view_matrix()
+void renderer::set_light_view()
 {
 	vec3 z = light;
 	vec3 x = vec3::cross_product(vec3({ 0.0f, 1.0f, 0.0f}), z).normalize();
@@ -185,7 +188,7 @@ matrix4 renderer::light_view_matrix()
 
 	matrix4 M = { vec3::embed_vector(x), vec3::embed_vector(y), vec3::embed_vector(z), vec4({ 0.0f, 0.0f, 0.0f, 1.0f }) };
 
-	return M.inverse();
+	light_view = M.inverse();
 }
 
 int renderer::get_shadow_buffer_value(int x, int y)

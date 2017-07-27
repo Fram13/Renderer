@@ -113,7 +113,6 @@
   <ItemGroup>
     <ClInclude Include="face.h" />
     <ClInclude Include="main_shader.h" />
-    <ClInclude Include="no_shdows_shader.h" />
     <ClInclude Include="shader.h" />
     <ClInclude Include="geometry.h" />
     <ClInclude Include="matrix.h" />
