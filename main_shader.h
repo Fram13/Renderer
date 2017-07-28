@@ -13,22 +13,31 @@ namespace graphics
 		matrix3 vt;
 		matrix3 vn;
 
+		matrix4 viewport_light_view, projection_view, projection_view_transponse_inverse;
+
 	public:
+		virtual void prepare() override
+		{
+			viewport_light_view = renderer::viewport * renderer::light_view;
+			projection_view = renderer::projection * renderer::view;
+			projection_view_transponse_inverse = projection_view.transponse().inverse();
+		}
+
 		virtual vec4 vertex(wavefront_model& model, int face_ind, int vert_ind)
 		{
 			face f = model.get_face(face_ind);
 
 			vec4 v4 = vec3::embed_point(model.vertex(f.v[vert_ind]));
 
-			vl.set_column(vec4::project(renderer::viewport * renderer::light_view * v4), vert_ind);
+			vl.set_column(vec4::project(viewport_light_view * v4), vert_ind);
 
-			v4 = renderer::projection * renderer::view * v4;
+			v4 = projection_view * v4;
 			v.set_column(vec4::project(v4), vert_ind);
 
 			vt.set_column(model.texture_vertex(f.vt[vert_ind]), vert_ind);
 
 			vec4 vn4 = vec3::embed_vector(model.normal(f.vn[vert_ind]));
-			vn4 = (renderer::projection * renderer::view).transponse().inverse() * vn4;
+			vn4 = projection_view_transponse_inverse * vn4;
 			vn.set_column(vec4::project(vn4), vert_ind);
 
 			return v4;

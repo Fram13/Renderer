@@ -69,9 +69,10 @@ void renderer::set_light(vec3& light_pos)
 	light = vec4::project((projection * view).transponse().inverse() * vec3::embed_vector(-light_pos)).normalize();
 }
 
-void renderer::render_models(std::vector<wavefront_model*>& models, shader*shdr)
+void renderer::render_models(std::vector<wavefront_model*>& models, shader* shdr)
 {
 	set_light_view();
+	shdr->prepare();
 
 	for (auto& model : models)
 	{
