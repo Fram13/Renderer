@@ -12,10 +12,10 @@ int main()
 	renderer::set_light(vec3({ 3.0f, -1.0f, -2.0f }));
 	renderer::set_view(vec3({ 0.0f, 0.0f, 0.0f }), vec3({ 0.0f, 0.0f, 5.0f }), vec3({ 0.0f, 1.0f, 0.0f }));
 
-	std::vector<wavefront_model&> models;
-	models.push_back(eye_inner);
-	models.push_back(head);
-	models.push_back(floor);
+	std::vector<wavefront_model*> models;
+	models.push_back(&eye_inner);
+	models.push_back(&head);
+	models.push_back(&floor);
 
 	renderer::render_models(models, &main_shdr);
 	

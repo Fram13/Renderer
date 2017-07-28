@@ -53,7 +53,7 @@ void renderer::set_view(vec3& center, vec3& camera, vec3& up)
 	vec3 x = geometry::cross_product(up, z).normalize();
 	vec3 y = geometry::cross_product(z, x).normalize();
 
-	matrix4 M = { vec3::embed_vector(x), vec3::embed_vector(y), vec3::embed_vector(z), vec4({ 0.0f, 0.0f, 0.0f, 1.0f }) };
+	matrix4 M = { vec3::embed_vector(x), vec3::embed_vector(y), vec3::embed_vector(z), vec4{ 0.0f, 0.0f, 0.0f, 1.0f } };
 	matrix4 T = matrix4::identity();
 	T.set_column(vec3::embed_point(-center), 3);
 
@@ -69,27 +69,27 @@ void renderer::set_light(vec3& light_pos)
 	light = vec4::project((projection * view).transponse().inverse() * vec3::embed_vector(-light_pos)).normalize();
 }
 
-void renderer::render_models(std::vector<wavefront_model&>& models, shader*shdr)
+void renderer::render_models(std::vector<wavefront_model*>& models, shader*shdr)
 {
 	set_light_view();
 
 	for (auto& model : models)
 	{
-		uint faces = model.faces_num();
+		uint faces = model->faces_num();
 
 		for (uint j = 0; j < faces; j++)
 		{
-			render_face_to_shadow_buffer(model, j);
+			render_face_to_shadow_buffer(*model, j);
 		}
 	}
 
 	for (auto& model : models)
 	{
-		uint faces = model.faces_num();
+		uint faces = model->faces_num();
 
 		for (uint j = 0; j < faces; j++)
 		{
-			render_face(model, j, shdr);
+			render_face(*model, j, shdr);
 		}
 	}
 }
