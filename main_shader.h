@@ -1,6 +1,7 @@
 #pragma once
 
 #include "renderer.h"
+#include <algorithm>
 
 namespace graphics
 {

@@ -1,6 +1,5 @@
 #pragma once
 
-#include <numeric>
 #include "wavefront_model.h"
 #include "shader.h"
 
@@ -17,7 +16,7 @@ namespace graphics
 		static void set_light(vec3& light_pos);
 
 		static void render_model(wavefront_model& model, shader* shdr);
-		static void render_models(std::vector<wavefront_model*>& models, shader*shdr);
+		static void render_models(std::vector<wavefront_model&>& models, shader*shdr);
 
 		static TGAImage& get_frame();
 

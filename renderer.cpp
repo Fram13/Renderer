@@ -1,4 +1,6 @@
 #include "renderer.h"
+#include <numeric>
+#include <algorithm>
 using namespace graphics;
 
 matrix4 renderer::viewport = matrix4::identity();
@@ -48,8 +50,8 @@ void renderer::set_viewport(int width, int height)
 void renderer::set_view(vec3& center, vec3& camera, vec3& up)
 {
 	vec3 z = (camera - center).normalize();
-	vec3 x = vec3::cross_product(up, z).normalize();
-	vec3 y = vec3::cross_product(z, x).normalize();
+	vec3 x = geometry::cross_product(up, z).normalize();
+	vec3 y = geometry::cross_product(z, x).normalize();
 
 	matrix4 M = { vec3::embed_vector(x), vec3::embed_vector(y), vec3::embed_vector(z), vec4({ 0.0f, 0.0f, 0.0f, 1.0f }) };
 	matrix4 T = matrix4::identity();
@@ -67,27 +69,27 @@ void renderer::set_light(vec3& light_pos)
 	light = vec4::project((projection * view).transponse().inverse() * vec3::embed_vector(-light_pos)).normalize();
 }
 
-void renderer::render_models(std::vector<wavefront_model*>& models, shader*shdr)
+void renderer::render_models(std::vector<wavefront_model&>& models, shader*shdr)
 {
 	set_light_view();
 
-	for (uint i = 0; i < models.size(); i++)
+	for (auto& model : models)
 	{
-		uint faces = models[i]->faces_num();
+		uint faces = model.faces_num();
 
 		for (uint j = 0; j < faces; j++)
 		{
-			render_face_to_shadow_buffer(*(models[i]), j);
+			render_face_to_shadow_buffer(model, j);
 		}
 	}
 
-	for (uint i = 0; i < models.size(); i++)
+	for (auto& model : models)
 	{
-		uint faces = models[i]->faces_num();
+		uint faces = model.faces_num();
 
 		for (uint j = 0; j < faces; j++)
 		{
-			render_face(*(models[i]), j, shdr);
+			render_face(model, j, shdr);
 		}
 	}
 }
@@ -126,7 +128,7 @@ void renderer::render_face(wavefront_model& model, int face_ind, shader* shdr)
 	vec3 a = scrn_vert.get_column(1) - scrn_vert.get_column(0);
 	vec3 b = scrn_vert.get_column(2) - scrn_vert.get_column(0);
 
-	if (!(vec3::cross_product(a, b).normalize()[2] > 0.0f))
+	if (!(geometry::cross_product(a, b).normalize()[2] > 0.0f))
 	{
 		return;
 	}
@@ -174,7 +176,7 @@ void renderer::render_face_to_shadow_buffer(wavefront_model& model, int face_ind
 	vec3 a = scrn_vert.get_column(1) - scrn_vert.get_column(0);
 	vec3 b = scrn_vert.get_column(2) - scrn_vert.get_column(0);
 
-	if (!(vec3::cross_product(a, b).normalize()[2] > 0.0f))
+	if (!(geometry::cross_product(a, b).normalize()[2] > 0.0f))
 	{
 		return;
 	}
@@ -208,8 +210,8 @@ void renderer::render_face_to_shadow_buffer(wavefront_model& model, int face_ind
 void renderer::set_light_view()
 {
 	vec3 z = light;
-	vec3 x = vec3::cross_product(vec3({ 0.0f, 1.0f, 0.0f}), z).normalize();
-	vec3 y = vec3::cross_product(z, x).normalize();
+	vec3 x = geometry::cross_product(vec3({ 0.0f, 1.0f, 0.0f}), z).normalize();
+	vec3 y = geometry::cross_product(z, x).normalize();
 
 	matrix4 M = { vec3::embed_vector(x), vec3::embed_vector(y), vec3::embed_vector(z), vec4({ 0.0f, 0.0f, 0.0f, 1.0f }) };
 

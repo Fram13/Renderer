@@ -1,7 +1,6 @@
 #pragma once
 
 #include <initializer_list>
-#include <algorithm>
 #include <stdexcept>
 #include <math.h>
 
@@ -9,24 +8,44 @@ namespace graphics
 {
 	using uint = unsigned int;
 
-	template <int SIZE>
+	template <uint SIZE>
 	class vector
 	{
-	public:
 		static_assert(SIZE > 1, "Vector size must be greater than one (at vector<SIZE>)");
 
-		vector()
+		template<uint ROWS, uint COLUMNS>
+		friend class matrix;
+
+	private:
+		float raw[SIZE];
+		static const float E;
+
+		void assign(const vector<SIZE>& other) noexcept
 		{
-			for (int i = 0; i < SIZE; i++)
+			if (this == &other)
+			{
+				return;
+			}
+
+			for (uint i = 0; i < SIZE; i++)
+			{
+				raw[i] = other.raw[i];
+			}
+		}
+
+	public:
+		explicit vector() noexcept
+		{
+			for (uint i = 0; i < SIZE; i++)
 			{
 				raw[i] = 0.0f;
 			}
 		}
 
-		vector(std::initializer_list<float> init_list)
+		vector(std::initializer_list<float> init_list) noexcept
 		{
 			auto iter = init_list.begin();
-			int i = 0;
+			uint i = 0;
 
 			while (i < SIZE && iter != init_list.end())
 			{
@@ -42,108 +61,106 @@ namespace graphics
 			}
 		}
 
-		vector<SIZE> add(vector<SIZE>& other)
+		vector(const vector<SIZE>& other) noexcept
+		{
+			assign(other);
+		}
+
+		vector(const vector<SIZE>&& other) noexcept
+		{
+			assign(other);
+		}
+		
+		~vector() noexcept
+		{
+
+		}
+
+		vector<SIZE>& operator=(const vector<SIZE>& other) noexcept
+		{
+			assign(other);
+			return *this;
+		}
+
+		vector<SIZE>& operator=(const vector<SIZE>&& other) noexcept
+		{
+			assign(other);
+			return *this;
+		}
+
+		friend vector<SIZE> operator+(const vector<SIZE>& left, const vector<SIZE>& right) noexcept
 		{
 			vector<SIZE> res;
 
-			for (int i = 0; i < SIZE; i++)
+			for (uint i = 0; i < SIZE; i++)
 			{
-				res[i] = raw[i] + other[i];
+				res.raw[i] = left.raw[i] + right.raw[i];
 			}
 
 			return res;
 		}
 
-		vector<SIZE> subtract(vector<SIZE>& other)
+		friend vector<SIZE> operator-(const vector<SIZE>& left) noexcept
+		{
+			return left * (-1.0f);
+		}
+
+		friend vector<SIZE> operator-(const vector<SIZE>& left, const vector<SIZE>& right) noexcept
 		{
 			vector<SIZE> res;
 
-			for (int i = 0; i < SIZE; i++)
+			for (uint i = 0; i < SIZE; i++)
 			{
-				res[i] = raw[i] - other[i];
+				res.raw[i] = left.raw[i] - right.raw[i];
 			}
 
 			return res;
 		}
 
-		vector<SIZE> multiply(float scalar)
-		{
-			vector<SIZE> res;
-
-			for (int i = 0; i < SIZE; i++)
-			{
-				res[i] = raw[i] * scalar;
-			}
-
-			return res;
-		}
-
-		float dot_product(vector<SIZE>& other)
+		friend float operator*(const vector<SIZE>& left, const vector<SIZE>& right) noexcept
 		{
 			float res = 0.0f;
 
-			for (int i = 0; i < SIZE; i++)
+			for (uint i = 0; i < SIZE; i++)
 			{
-				res += raw[i] * other[i];
+				res += left.raw[i] * right.raw[i];
 			}
 
 			return res;
 		}
 
-		float norm()
+		friend vector<SIZE> operator*(const vector<SIZE>& left, float factor) noexcept
 		{
-			float res = 0.0f;
+			vector<SIZE> res;
 
-			for (int i = 0; i < SIZE; i++)
+			for (uint i = 0; i < SIZE; i++)
 			{
-				res += raw[i] * raw[i];
+				res.raw[i] = left.raw[i] * factor;
 			}
 
-			return sqrt(res);
+			return res;
 		}
 
-		vector<SIZE> normalize()
+		friend vector<SIZE> operator*(float factor, const vector<SIZE>& left) noexcept
 		{
-			float length = norm();
+			return left * factor;
+		}
 
-			if (length > E)
+		friend vector<SIZE> operator/(const vector<SIZE>& left, float factor)
+		{
+			vector<SIZE> res;
+
+			for (uint i = 0; i < SIZE; i++)
 			{
-				return multiply(1.0f / length);
+				res.raw[i] = left.raw[i] / factor;
 			}
-			else
-			{
-				return *this;
-			}
+
+			return res;
 		}
 
-		vector<SIZE> operator+(vector<SIZE>& other)
+		float& operator[](uint ind)
 		{
-			return add(other);
-		}
-
-		vector<SIZE> operator-()
-		{
-			return multiply(-1.0f);
-		}
-
-		vector<SIZE> operator-(vector<SIZE>& other)
-		{
-			return subtract(other);
-		}
-
-		vector<SIZE> operator*(float scalar)
-		{
-			return multiply(scalar);
-		}
-
-		float operator*(vector<SIZE>& other)
-		{
-			return dot_product(other);
-		}
-
-		float& operator[](int ind)
-		{
-			if (ind < 0 || ind >= SIZE)
+			if (ind >= SIZE)
 			{
 				throw std::out_of_range("Index is out of range.");
 			}
@@ -151,34 +168,54 @@ namespace graphics
 			return raw[ind];
 		}
 
-		vector<SIZE>& operator=(vector<SIZE>& other)
+		const float& operator[](uint ind) const
 		{
-			for (int i = 0; i < SIZE; i++)
+			if (ind >= SIZE)
 			{
-				raw[i] = other[i];
+				throw std::out_of_range("Index is out of range.");
 			}
 
-			return *this;
+			return raw[ind];
 		}
 
-		static vector<SIZE + 1> embed_point(vector<SIZE>& vec);
+		float norm() const noexcept
+		{
+			float res = 0.0f;
 
-		static vector<SIZE + 1> embed_vector(vector<SIZE>& vec);
+			for (uint i = 0; i < SIZE; i++)
+			{
+				res += raw[i] * raw[i];
+			}
 
-		static vector<SIZE - 1> project(vector<SIZE>& vec);
+			return sqrt(res);
+		}
 
-		static vector<SIZE> cross_product(vector<SIZE>& vec1, vector<SIZE>& vec2);
+		vector<SIZE> normalize() const noexcept
+		{
+			float length = norm();
 
-	private:
-		float raw[SIZE];
-		static const float E;
+			if (length > E)
+			{
+				return (*this) / length;
+			}
+			else
+			{
+				return *this;
+			}
+		}
+
+		static vector<SIZE + 1> embed_point(vector<SIZE>& vec) noexcept;
+
+		static vector<SIZE + 1> embed_vector(vector<SIZE>& vec) noexcept;
+
+		static vector<SIZE - 1> project(vector<SIZE>& vec) noexcept;
 	};
 
-	template <int SIZE>
+	template <uint SIZE>
 	const float vector<SIZE>::E = 1e-6f;
 
-	template <int SIZE>
-	vector<SIZE + 1> vector<SIZE>::embed_point(vector<SIZE>& vec)
+	template <uint SIZE>
+	vector<SIZE + 1> vector<SIZE>::embed_point(vector<SIZE>& vec) noexcept
 	{
 		vector<SIZE + 1> res = vector<SIZE>::embed_vector(vec);
 
@@ -187,38 +224,30 @@ namespace graphics
 		return res;
 	}
 
-	template <int SIZE>
-	vector<SIZE + 1> vector<SIZE>::embed_vector(vector<SIZE>& vec)
+	template <uint SIZE>
+	vector<SIZE + 1> vector<SIZE>::embed_vector(vector<SIZE>& vec) noexcept
 	{
 		vector<SIZE + 1> res;
 
-		for (int i = 0; i < SIZE; i++)
+		for (uint i = 0; i < SIZE; i++)
 		{
-			res[i] = vec[i];
+			res[i] = vec.raw[i];
 		}
 
 		return res;
 	}
 
-	template <int SIZE>
-	vector<SIZE - 1> vector<SIZE>::project(vector<SIZE>& vec)
+	template <uint SIZE>
+	vector<SIZE - 1> vector<SIZE>::project(vector<SIZE>& vec) noexcept
 	{
 		vector<SIZE - 1> res;
-		float m = abs(vec[SIZE - 1]) > vector<SIZE>::E ? vec[SIZE - 1] : 1.0f;
+		float factor = abs(vec[SIZE - 1]) > vector<SIZE>::E ? vec[SIZE - 1] : 1.0f;
 
-		for (int i = 0; i < SIZE - 1; i++)
+		for (uint i = 0; i < SIZE - 1; i++)
 		{
-			res[i] = vec[i] / m;
+			res[i] = vec.raw[i] / factor;
 		}
 
 		return res;
-	}
-
-	template <int SIZE>
-	vector<SIZE> vector<SIZE>::cross_product(vector<SIZE>& vec1, vector<SIZE>& vec2)
-	{
-		static_assert(SIZE == 3, "Cross product can only be computed in a three-dimensional space (at vector<SIZE>::cross_product(vector<SIZE>& vec1, vector<SIZE>& vec2))");
-
-		return vector<SIZE>({ vec1[1] * vec2[2] - vec2[1] * vec1[2], -(vec1[0] * vec2[2] - vec2[0] * vec1[2]), vec1[0] * vec2[1] - vec2[0] * vec1[1] });
 	}
 }
