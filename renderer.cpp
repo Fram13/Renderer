@@ -98,6 +98,7 @@ void renderer::render_models(std::vector<wavefront_model*>& models, shader* shdr
 void renderer::render_model(wavefront_model& model, shader*shdr)
 {
 	set_light_view();
+	shdr->prepare();
 
 	int faces = model.faces_num();
 

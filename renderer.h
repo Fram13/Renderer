@@ -36,5 +36,6 @@ namespace graphics
 		static void set_light_view();
 		static void render_face(wavefront_model& model, int face_ind, shader* shdr);
 		static void render_face_to_shadow_buffer(wavefront_model& model, int face_ind);
+		//static void smooth();
 	};
 }
