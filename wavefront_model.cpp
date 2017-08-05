@@ -90,7 +90,7 @@ float wavefront_model::specular_map(vec3& coords)
 	int y = (int)(_specular_map->get_height() - coords[1] * _specular_map->get_height());
 	unsigned char exp = _specular_map->get(x, y).r;
 
-	return exp > 0 ? exp : exp + 1;
+	return (float)(exp > 0 ? exp : exp + 1);
 }
 
 int wavefront_model::faces_num()
@@ -119,15 +119,15 @@ void wavefront_model::read_obj_file(std::string path)
 
 			if (s == 't')
 			{
-				texture_vertices.push_back(vec3({ x, y, z }));
+				texture_vertices.push_back(vec3{ x, y, z });
 			}
 			else if (s == 'n')
 			{
-				normals.push_back(vec3({ x, y, z }));
+				normals.push_back(vec3{ x, y, z });
 			}
 			else
 			{
-				vertices.push_back(vec3({ x, y, z }));
+				vertices.push_back(vec3{ x, y, z });
 			}
 		}
 		else if (s == 'f')
@@ -170,7 +170,7 @@ void wavefront_model::scale(vec3& vec)
 	m[1][1] = vec[1];
 	m[2][2] = vec[2];
 
-	for (int i = 0; i < vertices.size(); i++)
+	for (uint i = 0; i < vertices.size(); i++)
 	{
 		vertices[i] = vec4::project(m * vec3::embed_point(vertices[i]));
 	}
@@ -183,7 +183,7 @@ void wavefront_model::translate(vec3& vec)
 	m[1][3] = vec[1];
 	m[2][3] = vec[2];
 
-	for (int i = 0; i < vertices.size(); i++)
+	for (uint i = 0; i < vertices.size(); i++)
 	{
 		vertices[i] = vec4::project(m * vec3::embed_point(vertices[i]));
 	}

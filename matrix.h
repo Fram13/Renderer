@@ -4,27 +4,39 @@
 
 namespace graphics
 {
-	template <int ROWS, int COLUMNS>
+	template <uint ROWS, uint COLUMNS>
 	class matrix
 	{
-	public:
 		static_assert(ROWS > 1, "Matrix rows number must be greater than one (at matrix<ROWS, COLUMNS>)");
 		static_assert(COLUMNS > 1, "Matrix columns number must be greater than one (at matrix<ROWS, COLUMNS>)");
 
-		matrix()
+	private:
+		vector<COLUMNS> raw[ROWS];
+		static const float E;
+
+		void assign(const matrix<ROWS, COLUMNS>& other) noexcept
+		{
+			for (uint i = 0; i < ROWS; i++)
+			{
+				raw[i] = other.raw[i];
+			}
+		}
+
+	public:
+		explicit matrix() noexcept
 		{
 
 		}
 
-		matrix(std::initializer_list<std::initializer_list<float>> init_list)
+		matrix(std::initializer_list<std::initializer_list<float>> init_list) noexcept
 		{
 			auto rows_iter = init_list.begin();
-			int i = 0;
+			uint i = 0;
 
 			while (i < ROWS && rows_iter != init_list.end())
 			{
 				auto columns_iter = rows_iter->begin();
-				int j = 0;
+				uint j = 0;
 
 				while (j < COLUMNS && columns_iter != rows_iter->end())
 				{
@@ -38,10 +50,10 @@ namespace graphics
 			}
 		}
 
-		matrix(std::initializer_list<vector<ROWS>> init_list)
+		matrix(std::initializer_list<vector<ROWS>> init_list) noexcept
 		{
 			auto iter = init_list.begin();
-			int j = 0;
+			uint j = 0;
 
 			while (j < COLUMNS && iter != init_list.end())
 			{
@@ -52,9 +64,65 @@ namespace graphics
 			}
 		}
 
-		vector<COLUMNS> get_row(int ind)
+		matrix(const matrix<ROWS, COLUMNS>& other) noexcept
 		{
-			if (ind < 0 || ind >= ROWS)
+			assign(other);
+		}
+
+		matrix(const matrix<ROWS, COLUMNS>&& other) noexcept
+		{
+			assign(other);
+		}
+
+		~matrix() noexcept
+		{
+
+		}
+
+		matrix<ROWS, COLUMNS>& operator=(const matrix<ROWS, COLUMNS>& other) noexcept
+		{
+			assign(other);
+			return *this;
+		}
+
+		matrix<ROWS, COLUMNS>& operator=(const matrix<ROWS, COLUMNS>&& other) noexcept
+		{
+			assign(other);
+			return *this;
+		}
+
+		friend vector<ROWS> operator*(const matrix<ROWS, COLUMNS>& left, const vector<COLUMNS>& right) noexcept
+		{
+			vector<ROWS> res;
+
+			for (uint i = 0; i < ROWS; i++)
+			{
+				res[i] = left.raw[i] * right;
+			}
+
+			return res;
+		}
+
+		template<uint OTHER_COLUMNS>
+		friend matrix<ROWS, OTHER_COLUMNS> operator*(const matrix<ROWS, COLUMNS>& left, const matrix<COLUMNS, OTHER_COLUMNS>& right) noexcept
+		{
+			matrix<ROWS, OTHER_COLUMNS> res;
+			matrix<OTHER_COLUMNS, COLUMNS> right_t = right.transponse();
+
+			for (uint i = 0; i < ROWS; i++)
+			{
+				for (uint j = 0; j < OTHER_COLUMNS; j++)
+				{
+					res[i][j] = left.raw[i] * right_t.raw[j];
+				}
+			}
+
+			return res;
+		}
+
+		vector<COLUMNS>& operator[](uint ind)
+		{
+			if (ind >= ROWS)
 			{
 				throw std::out_of_range("Index is out of range.");
 			}
@@ -62,9 +130,29 @@ namespace graphics
 			return raw[ind];
 		}
 
-		void set_row(vector<COLUMNS>& row, int ind)
+		const vector<COLUMNS>& operator[](uint ind) const
 		{
-			if (ind < 0 || ind >= ROWS)
+			if (ind >= ROWS)
+			{
+				throw std::out_of_range("Index is out of range.");
+			}
+
+			return raw[ind];
+		}
+
+		vector<COLUMNS> get_row(uint ind) const
+		{
+			if (ind >= ROWS)
+			{
+				throw std::out_of_range("Index is out of range.");
+			}
+
+			return raw[ind];
+		}
+
+		void set_row(vector<COLUMNS>& row, uint ind)
+		{
+			if (ind >= ROWS)
 			{
 				throw std::out_of_range("Index is out of range.");
 			}
@@ -72,94 +160,65 @@ namespace graphics
 			raw[ind] = row;
 		}
 
-		vector<ROWS> get_column(int ind)
+		vector<ROWS> get_column(uint ind) const
 		{
-			if (ind < 0 || ind >= COLUMNS)
+			if (ind >= COLUMNS)
 			{
 				throw std::out_of_range("Index is out of range.");
 			}
 
 			vector<ROWS> res;
 
-			for (int i = 0; i < ROWS; i++)
+			for (uint i = 0; i < ROWS; i++)
 			{
-				res[i] = raw[i][ind];
+				res.raw[i] = raw[i].raw[ind];
 			}
 
 			return res;
 		}
 
-		void set_column(vector<ROWS>& column, int ind)
+		void set_column(vector<ROWS>& column, uint ind)
 		{
-			if (ind < 0 || ind >= COLUMNS)
+			if (ind >= COLUMNS)
 			{
 				throw std::out_of_range("Index is out of range.");
 			}
 
-			for (int i = 0; i < ROWS; i++)
+			for (uint i = 0; i < ROWS; i++)
 			{
-				raw[i][ind] = column[i];
+				raw[i][ind] = column.raw[i];
 			}
 		}
 
-		vector<ROWS> multiply(vector<COLUMNS>& other)
-		{
-			vector<ROWS> res;
-
-			for (int i = 0; i < ROWS; i++)
-			{
-				res[i] = raw[i] * other;
-			}
-
-			return res;
-		}
-
-		template<int OTHER_COLUMNS>
-		matrix<ROWS, OTHER_COLUMNS> multiply(matrix<COLUMNS, OTHER_COLUMNS>& other)
-		{
-			matrix<ROWS, OTHER_COLUMNS> res;
-			matrix<OTHER_COLUMNS, COLUMNS> other_tr = other.transponse();
-
-			for (int i = 0; i < ROWS; i++)
-			{
-				for (int j = 0; j < OTHER_COLUMNS; j++)
-				{
-					res[i][j] = raw[i] * other_tr[j];
-				}
-			}
-
-			return res;
-		}
-
-		matrix<COLUMNS, ROWS> transponse()
+		matrix<COLUMNS, ROWS> transponse() const noexcept
 		{
 			matrix<COLUMNS, ROWS> res;
 
-			for (int i = 0; i < ROWS; i++)
+			for (uint i = 0; i < ROWS; i++)
 			{
-				for (int j = 0; j < COLUMNS; j++)
+				for (uint j = 0; j < COLUMNS; j++)
 				{
-					res[j][i] = raw[i][j];
+					res.raw[j][i] = raw[i][j];
 				}
 			}
 
 			return res;
 		}
 
-		matrix<ROWS, COLUMNS> inverse()
+		matrix<ROWS, COLUMNS> inverse() const
 		{
 			static_assert(ROWS == COLUMNS, "Inverse matrix must be square (at matrix<ROWS, COLUMNS>.inverse())");
 
 			matrix<ROWS, COLUMNS> matr = *this;
 			matrix<ROWS, COLUMNS> res = identity();
 
-			for (int i = 0; i < ROWS; i++)
+			for (uint i = 0; i < ROWS; i++)
 			{
 				if (abs(matr[i][i]) < E)
 				{
 					bool inverse_exists = false;
 
-					for (int j = i + 1; j < ROWS; j++)
+					for (uint j = i + 1; j < ROWS; j++)
 					{
 						if (abs(matr[j][i]) > E)
 						{
@@ -182,17 +241,17 @@ namespace graphics
 					}
 				}
 
-				float m = 1.0f / matr[i][i];
-				matr[i] = matr[i] * m;
-				res[i] = res[i] * m;
+				float factor = 1.0f / matr[i][i];
+				matr[i] = matr[i] * factor;
+				res[i] = res[i] * factor;
 
-				for (int j = 0; j < COLUMNS; j++)
+				for (uint j = 0; j < COLUMNS; j++)
 				{
 					if (j != i)
 					{
-						m = matr[j][i];
-						matr[j] = matr[j] - matr[i] * m;
-						res[j] = res[j] - res[i] * m;
+						factor = matr[j][i];
+						matr[j] = matr[j] - matr[i] * factor;
+						res[j] = res[j] - res[i] * factor;
 					}
 				}
 			}
@@ -200,55 +259,20 @@ namespace graphics
 			return res;
 		}
 
-		vector<ROWS> operator*(vector<COLUMNS>& other)
-		{
-			return multiply(other);
-		}
-
-		template<int OTHER_COLUMNS>
-		matrix<ROWS, OTHER_COLUMNS> operator*(matrix<COLUMNS, OTHER_COLUMNS>& other)
-		{
-			return multiply(other);
-		}
-
-		vector<COLUMNS>& operator[](int ind)
-		{
-			if (ind < 0 || ind >= ROWS)
-			{
-				throw std::out_of_range("Index is out of range.");
-			}
-
-			return raw[ind];
-		}
-
-		matrix<ROWS, COLUMNS>& operator=(matrix<ROWS, COLUMNS>& other)
-		{
-			for (int i = 0; i < ROWS; i++)
-			{
-				raw[i] = other[i];
-			}
-
-			return *this;
-		}
-
-		static matrix<ROWS, COLUMNS> identity();
-
-	private:
-		vector<COLUMNS> raw[ROWS];
-		static const float E;
+		static matrix<ROWS, COLUMNS> identity() noexcept;
 	};
 
-	template <int ROWS, int COLUMNS>
+	template <uint ROWS, uint COLUMNS>
 	const float matrix<ROWS, COLUMNS>::E = 1e-6f;
 
-	template <int ROWS, int COLUMNS>
-	matrix<ROWS, COLUMNS> matrix<ROWS, COLUMNS>::identity()
+	template <uint ROWS, uint COLUMNS>
+	matrix<ROWS, COLUMNS> matrix<ROWS, COLUMNS>::identity() noexcept
 	{
 		static_assert(ROWS == COLUMNS, "Identity matrix must be square (at matrix<ROWS, COLUMNS>::identity())");
 
 		matrix<ROWS, COLUMNS> res;
 
-		for (int i = 0; i < ROWS; i++)
+		for (uint i = 0; i < ROWS; i++)
 		{
 			res[i][i] = 1.0f;
 		}
