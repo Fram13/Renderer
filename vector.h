@@ -20,9 +20,12 @@ namespace graphics
 		float raw[SIZE];
 
 		explicit vector() = default;
+
 		vector(const vector<SIZE>& other) = default;
-		vector<SIZE>& operator=(const vector<SIZE>& other) = default;
+
 		~vector() = default;
+
+		vector<SIZE>& operator=(const vector<SIZE>& other) = default;
 
 		friend vector<SIZE> operator+(const vector<SIZE>& left, const vector<SIZE>& right) noexcept
 		{

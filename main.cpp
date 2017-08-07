@@ -4,7 +4,7 @@ using namespace graphics;
 
 int main()
 {
-	/*wavefront_model head("models\\african_head\\african_head.obj");
+	wavefront_model head("models\\african_head\\african_head.obj");
 	wavefront_model eye_inner("models\\african_head\\african_head_eye_inner.obj");
 	wavefront_model floor("models\\floor\\floor.obj");
 
@@ -23,6 +23,6 @@ int main()
 	frame.flip_vertically();
 	frame.write_tga_file("frames\\african_head.tga");
 	renderer::dispose();
-	system("frames\\african_head.tga");*/
+	system("frames\\african_head.tga");
 	return 0;
 }
