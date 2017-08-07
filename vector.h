@@ -9,84 +9,20 @@ namespace graphics
 	using uint = unsigned int;
 
 	template <uint SIZE>
-	class vector
+	struct vector
 	{
 		static_assert(SIZE > 1, "Vector size must be greater than one (at vector<SIZE>)");
 
-		template<uint ROWS, uint COLUMNS>
-		friend class matrix;
-
 	private:
-		float raw[SIZE];
 		static const float E;
 
-		void assign(const vector<SIZE>& other) noexcept
-		{
-			if (this == &other)
-			{
-				return;
-			}
-
-			for (uint i = 0; i < SIZE; i++)
-			{
-				raw[i] = other.raw[i];
-			}
-		}
-
 	public:
-		explicit vector() noexcept
-		{
-			for (uint i = 0; i < SIZE; i++)
-			{
-				raw[i] = 0.0f;
-			}
-		}
+		float raw[SIZE];
 
-		vector(std::initializer_list<float> init_list) noexcept
-		{
-			auto iter = init_list.begin();
-			uint i = 0;
-
-			while (i < SIZE && iter != init_list.end())
-			{
-				raw[i] = *iter;
-				i++;
-				iter++;
-			}
-
-			while (i < SIZE)
-			{
-				raw[i] = 0.0f;
-				i++;
-			}
-		}
-
-		vector(const vector<SIZE>& other) noexcept
-		{
-			assign(other);
-		}
-
-		vector(const vector<SIZE>&& other) noexcept
-		{
-			assign(other);
-		}
-		
-		~vector() noexcept
-		{
-
-		}
-
-		vector<SIZE>& operator=(const vector<SIZE>& other) noexcept
-		{
-			assign(other);
-			return *this;
-		}
-
-		vector<SIZE>& operator=(const vector<SIZE>&& other) noexcept
-		{
-			assign(other);
-			return *this;
-		}
+		explicit vector() = default;
+		vector(const vector<SIZE>& other) = default;
+		vector<SIZE>& operator=(const vector<SIZE>& other) = default;
+		~vector() = default;
 
 		friend vector<SIZE> operator+(const vector<SIZE>& left, const vector<SIZE>& right) noexcept
 		{
@@ -148,6 +84,11 @@ namespace graphics
 
 		friend vector<SIZE> operator/(const vector<SIZE>& left, float factor)
 		{
+			if (abs(factor) < vector<SIZE>::E)
+			{
+				throw std::invalid_argument("Dividing by zero.");
+			}
+
 			vector<SIZE> res;
 
 			for (uint i = 0; i < SIZE; i++)

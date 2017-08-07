@@ -14,7 +14,7 @@ namespace graphics
 	public:
 		static vec3 cross_product(const vec3& left, const vec3& right)
 		{
-			return vec3{ left[1] * right[2] - right[1] * left[2], -(left[0] * right[2] - right[0] * left[2]), left[0] * right[1] - right[0] * left[1] };
+			return { left[1] * right[2] - right[1] * left[2], -(left[0] * right[2] - right[0] * left[2]), left[0] * right[1] - right[0] * left[1] };
 		}
 
 		static vec3 barycentric(matrix3& vertices, vec3& p)
@@ -23,7 +23,7 @@ namespace graphics
 			vec3 y = { vertices[1][1] - vertices[1][0], vertices[1][2] - vertices[1][0], vertices[1][0] - p[1] };
 			vec3 cross = geometry::cross_product(x, y);
 
-			return vec3({ 1.0f - (cross[0] + cross[1]) / cross[2], cross[0] / cross[2], cross[1] / cross[2] });
+			return { 1.0f - (cross[0] + cross[1]) / cross[2], cross[0] / cross[2], cross[1] / cross[2] };
 		}
 	};
 }
