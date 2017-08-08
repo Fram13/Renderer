@@ -23,7 +23,7 @@ namespace graphics
 			projection_view_transponse_inverse = projection_view.transponse().inverse();
 		}
 
-		virtual vec4 vertex(wavefront_model& model, int face_ind, int vert_ind)
+		virtual vec4 vertex(const wavefront_model& model, int face_ind, int vert_ind)
 		{
 			face f = model.get_face(face_ind);
 
@@ -43,7 +43,7 @@ namespace graphics
 			return v4;
 		}
 
-		virtual TGAColor fragment(wavefront_model& model, vec3& barycentric)
+		virtual TGAColor fragment(const wavefront_model& model, const vec3& barycentric)
 		{
 			vec3 uv = vt * barycentric;
 			vec3 k = (vn * barycentric).normalize();

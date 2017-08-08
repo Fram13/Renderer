@@ -9,17 +9,44 @@ namespace graphics
 	using uint = unsigned int;
 
 	template <uint SIZE>
-	struct vector
+	class vector
 	{
 		static_assert(SIZE > 1, "Vector size must be greater than one (at vector<SIZE>)");
 
+		template <uint ROWS, uint COLUMNS>
+		friend class matrix;
+
 	private:
 		static const float E;
-
-	public:
 		float raw[SIZE];
 
-		explicit vector() = default;
+	public:
+		explicit vector()
+		{
+			for (uint i = 0; i < SIZE; i++)
+			{
+				raw[i] = 0.0f;
+			}
+		}
+
+		vector(std::initializer_list<float> init_list)
+		{
+			uint i = 0;
+			auto iter = init_list.begin();
+
+			while (i < SIZE && iter != init_list.end())
+			{
+				raw[i] = *iter;
+				i++;
+				iter++;
+			}
+
+			while (i < SIZE)
+			{
+				raw[i] = 0.0f;
+				i++;
+			}
+		}
 
 		vector(const vector<SIZE>& other) = default;
 

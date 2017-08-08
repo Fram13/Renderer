@@ -10,24 +10,27 @@ namespace graphics
 	class wavefront_model
 	{
 	public:
-		wavefront_model(std::string path);
+		explicit wavefront_model(const std::string& path);
+		wavefront_model(const wavefront_model& other) = default;
 		~wavefront_model();
 
-		face get_face(int ind);
-		vec3 vertex(int ind);
-		vec3 texture_vertex(int ind);
-		vec3 normal(int ind);
+		wavefront_model& operator=(const wavefront_model& other) = delete;
 
-		TGAColor texture_map(vec3& coords);
-		vec3 normal_map(vec3& coords);
-		vec3 normal_tangent_map(vec3& coords);
-		float specular_map(vec3& coords);
+		face get_face(int ind) const;
+		vec3 vertex(int ind) const;
+		vec3 texture_vertex(int ind) const;
+		vec3 normal(int ind) const;
 
-		int faces_num();
+		TGAColor texture_map(const vec3& coords) const;
+		vec3 normal_map(const vec3& coords) const;
+		vec3 normal_tangent_map(const vec3& coords) const;
+		float specular_map(const vec3& coords) const;
 
-		//void rotate(float angle, vec3& vec);
-		void scale(vec3& vec);
-		void translate(vec3& vec);
+		int faces_num() const noexcept;
+
+		//void rotate(float angle, const vec3& vec) noexcept;
+		void scale(const vec3& vec) noexcept;
+		void translate(const vec3& vec) noexcept;
 
 	private:
 		std::vector<face> faces;
@@ -40,7 +43,7 @@ namespace graphics
 		TGAImage* _normal_tangent_map;
 		TGAImage* _specular_map;
 
-		void read_obj_file(std::string path);
-		TGAImage* load_map(std::string path);
+		void read_obj_file(const std::string& path);
+		TGAImage* load_map(const std::string& path);
 	};
 }
