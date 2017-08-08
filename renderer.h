@@ -8,21 +8,22 @@ namespace graphics
 	class renderer
 	{
 	public:
+		renderer() = delete;
+
 		static matrix4 viewport, projection, view, light_view;
 		static vec3 light;
 
 		static void set_viewport(int width, int height);
-		static void set_view(vec3& center, vec3& camera, vec3& up);
-		static void set_light(vec3& light_pos);
+		static void set_view(const vec3& center, const vec3& camera, const vec3& up) noexcept;
+		static void set_light(const vec3& light_pos) noexcept;
 
-		static void render_model(wavefront_model& model, shader* shdr);
-		static void render_models(std::vector<wavefront_model*>& models, shader*shdr);
+		static void render_models(const std::vector<std::reference_wrapper<wavefront_model>>& models, shader* shdr) noexcept;
 
 		static TGAImage& get_frame();
 
 		static void dispose();
 		
-		static int get_shadow_buffer_value(int x, int y);
+		static int get_shadow_buffer_value(int x, int y) noexcept;
 
 	private:
 		static int width, height;
@@ -33,9 +34,8 @@ namespace graphics
 
 		static TGAImage* frame;
 
-		static void set_light_view();
-		static void render_face(wavefront_model& model, int face_ind, shader* shdr);
-		static void render_face_to_shadow_buffer(wavefront_model& model, int face_ind);
-		//static void smooth();
+		static void set_light_view() noexcept;
+		static void render_face(const wavefront_model& model, int face_ind, shader* shdr) noexcept;
+		static void render_face_to_shadow_buffer(const wavefront_model& model, int face_ind) noexcept;
 	};
 }

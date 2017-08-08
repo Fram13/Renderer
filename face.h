@@ -2,7 +2,6 @@
 
 namespace graphics
 {
-	//Представляет поверхность в модели.
 	class face
 	{
 	public:

@@ -9,13 +9,13 @@ int main()
 	wavefront_model floor("models\\floor\\floor.obj");
 
 	renderer::set_viewport(800, 800);
-	renderer::set_light(vec3({ 3.0f, -1.0f, -2.0f }));
-	renderer::set_view(vec3({ 0.0f, 0.0f, 0.0f }), vec3({ 0.0f, 0.0f, 5.0f }), vec3({ 0.0f, 1.0f, 0.0f }));
+	renderer::set_light(vec3({ -3.0f, -1.0f, -2.0f }));
+	renderer::set_view(vec3({ 0.0f, 0.0f, 0.0f }), vec3({ 1.0f, 1.0f, 5.0f }), vec3({ 0.0f, 1.0f, 0.0f }));
 
-	std::vector<wavefront_model*> models;
-	models.push_back(&eye_inner);
-	models.push_back(&head);
-	models.push_back(&floor);
+	std::vector<std::reference_wrapper<wavefront_model>> models;
+	models.push_back(std::ref(eye_inner));
+	models.push_back(std::ref(head));
+	models.push_back(std::ref(floor));
 
 	renderer::render_models(models, &main_shdr);
 	

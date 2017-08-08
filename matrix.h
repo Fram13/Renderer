@@ -14,43 +14,19 @@ namespace graphics
 		vector<COLUMNS> raw[ROWS];
 		static const float E;
 
-		void assign(const matrix<ROWS, COLUMNS>& other) noexcept
-		{
-			for (uint i = 0; i < ROWS; i++)
-			{
-				raw[i] = other.raw[i];
-			}
-		}
-
 	public:
 		explicit matrix() noexcept
 		{
-
-		}
-
-		matrix(std::initializer_list<std::initializer_list<float>> init_list) noexcept
-		{
-			auto rows_iter = init_list.begin();
-			uint i = 0;
-
-			while (i < ROWS && rows_iter != init_list.end())
+			for (uint i = 0; i < ROWS; i++)
 			{
-				auto columns_iter = rows_iter->begin();
-				uint j = 0;
-
-				while (j < COLUMNS && columns_iter != rows_iter->end())
+				for (uint j = 0; j < COLUMNS; j++)
 				{
-					raw[i][j] = *columns_iter;
-					columns_iter++;
-					j++;
+					raw[i].raw[j] = 0.0f;
 				}
-
-				rows_iter++;
-				i++;
 			}
 		}
 
-		matrix(std::initializer_list<vector<ROWS>> init_list) noexcept
+		matrix(const std::initializer_list<vector<ROWS>> init_list) noexcept
 		{
 			auto iter = init_list.begin();
 			uint j = 0;
@@ -64,56 +40,35 @@ namespace graphics
 			}
 		}
 
-		matrix(const matrix<ROWS, COLUMNS>& other) noexcept
-		{
-			assign(other);
-		}
+		matrix(const matrix<ROWS, COLUMNS>& other) = default;
 
-		matrix(const matrix<ROWS, COLUMNS>&& other) noexcept
-		{
-			assign(other);
-		}
+		~matrix() = default;
 
-		~matrix() noexcept
-		{
+		matrix<ROWS, COLUMNS>& operator=(const matrix<ROWS, COLUMNS>& other) = default;
 
-		}
-
-		matrix<ROWS, COLUMNS>& operator=(const matrix<ROWS, COLUMNS>& other) noexcept
-		{
-			assign(other);
-			return *this;
-		}
-
-		matrix<ROWS, COLUMNS>& operator=(const matrix<ROWS, COLUMNS>&& other) noexcept
-		{
-			assign(other);
-			return *this;
-		}
-
-		friend vector<ROWS> operator*(const matrix<ROWS, COLUMNS>& left, const vector<COLUMNS>& right) noexcept
+		vector<ROWS> operator*(const vector<COLUMNS>& right) const noexcept
 		{
 			vector<ROWS> res;
 
 			for (uint i = 0; i < ROWS; i++)
 			{
-				res[i] = left.raw[i] * right;
+				res.raw[i] = this->raw[i] * right;
 			}
 
 			return res;
 		}
 
 		template<uint OTHER_COLUMNS>
-		friend matrix<ROWS, OTHER_COLUMNS> operator*(const matrix<ROWS, COLUMNS>& left, const matrix<COLUMNS, OTHER_COLUMNS>& right) noexcept
+		matrix<ROWS, OTHER_COLUMNS> operator*(const matrix<COLUMNS, OTHER_COLUMNS>& right) const noexcept
 		{
 			matrix<ROWS, OTHER_COLUMNS> res;
-			matrix<OTHER_COLUMNS, COLUMNS> right_t = right.transponse();
+			matrix<OTHER_COLUMNS, COLUMNS> right_tr = right.transponse();
 
 			for (uint i = 0; i < ROWS; i++)
 			{
 				for (uint j = 0; j < OTHER_COLUMNS; j++)
 				{
-					res[i][j] = left.raw[i] * right_t.raw[j];
+					res.raw[i].raw[j] = this->raw[i] * right_tr.raw[j];
 				}
 			}
 
@@ -150,7 +105,7 @@ namespace graphics
 			return raw[ind];
 		}
 
-		void set_row(vector<COLUMNS>& row, uint ind)
+		void set_row(const vector<COLUMNS>& row, uint ind)
 		{
 			if (ind >= ROWS)
 			{
@@ -177,7 +132,7 @@ namespace graphics
 			return res;
 		}
 
-		void set_column(vector<ROWS>& column, uint ind)
+		void set_column(const vector<ROWS>& column, uint ind)
 		{
 			if (ind >= COLUMNS)
 			{
@@ -186,7 +141,7 @@ namespace graphics
 
 			for (uint i = 0; i < ROWS; i++)
 			{
-				raw[i][ind] = column.raw[i];
+				raw[i].raw[ind] = column.raw[i];
 			}
 		}
 

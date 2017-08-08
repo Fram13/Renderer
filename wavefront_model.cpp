@@ -1,10 +1,12 @@
 #include "wavefront_model.h"
 using namespace graphics;
 
-wavefront_model::wavefront_model(std::string path)
+wavefront_model::wavefront_model(const std::string& path)
 {
+	std::string _path = path;
+
 	read_obj_file(path);
-	std::string name = path.replace(path.length() - 4, 4, "");
+	std::string name = _path.replace(path.length() - 4, 4, "");
 	_texture_map = load_map(name + "_diffuse.tga");
 	_normal_map = load_map(name + "_nm.tga");
 	_normal_tangent_map = load_map(name + "_nm_tangent.tga");
@@ -38,27 +40,27 @@ wavefront_model::~wavefront_model()
 	}
 }
 
-face wavefront_model::get_face(int ind)
+face wavefront_model::get_face(int ind) const
 {
 	return faces[ind];
 }
 
-vec3 wavefront_model::vertex(int ind)
+vec3 wavefront_model::vertex(int ind) const
 {
 	return vertices[ind];
 }
 
-vec3 wavefront_model::texture_vertex(int ind)
+vec3 wavefront_model::texture_vertex(int ind) const
 {
 	return texture_vertices[ind];
 }
 
-vec3 wavefront_model::normal(int ind)
+vec3 wavefront_model::normal(int ind) const
 {
 	return normals[ind];
 }
 
-TGAColor wavefront_model::texture_map(vec3& coords)
+TGAColor wavefront_model::texture_map(const vec3& coords) const
 {
 	int x = (int)(coords[0] * _texture_map->get_width());
 	int y = (int)(_texture_map->get_height() - coords[1] * _texture_map->get_height());
@@ -66,7 +68,7 @@ TGAColor wavefront_model::texture_map(vec3& coords)
 	return _texture_map->get(x, y);
 }
 
-vec3 wavefront_model::normal_map(vec3& coords)
+vec3 wavefront_model::normal_map(const vec3& coords) const
 {
 	int x = (int)(coords[0] * _normal_map->get_width());
 	int y = (int)(_normal_map->get_height() - coords[1] * _normal_map->get_height());
@@ -75,7 +77,7 @@ vec3 wavefront_model::normal_map(vec3& coords)
 	return vec3({ color.r - 127.0f, color.g - 127.0f, color.b - 127.0f }).normalize();
 }
 
-vec3 wavefront_model::normal_tangent_map(vec3& coords)
+vec3 wavefront_model::normal_tangent_map(const vec3& coords) const
 {
 	int x = (int)(coords[0] * _normal_tangent_map->get_width());
 	int y = (int)(_normal_tangent_map->get_height() - coords[1] * _normal_tangent_map->get_height());
@@ -84,7 +86,7 @@ vec3 wavefront_model::normal_tangent_map(vec3& coords)
 	return vec3({ color.r - 127.0f, color.g - 127.0f, color.b - 127.0f }).normalize();
 }
 
-float wavefront_model::specular_map(vec3& coords)
+float wavefront_model::specular_map(const vec3& coords) const
 {
 	int x = (int)(coords[0] * _specular_map->get_width());
 	int y = (int)(_specular_map->get_height() - coords[1] * _specular_map->get_height());
@@ -93,12 +95,12 @@ float wavefront_model::specular_map(vec3& coords)
 	return (float)(exp > 0 ? exp : exp + 1);
 }
 
-int wavefront_model::faces_num()
+int wavefront_model::faces_num() const noexcept
 {
 	return faces.size();
 }
 
-void wavefront_model::read_obj_file(std::string path)
+void wavefront_model::read_obj_file(const std::string& path)
 {
 	std::ifstream input(path);
 	char s;
@@ -150,7 +152,7 @@ void wavefront_model::read_obj_file(std::string path)
 	input.close();
 }
 
-TGAImage* wavefront_model::load_map(std::string path)
+TGAImage* wavefront_model::load_map(const std::string& path)
 {
 	TGAImage* map = new TGAImage();
 
@@ -163,7 +165,7 @@ TGAImage* wavefront_model::load_map(std::string path)
 	return map;
 }
 
-void wavefront_model::scale(vec3& vec)
+void wavefront_model::scale(const vec3& vec) noexcept
 {
 	matrix4 m = matrix4::identity();
 	m[0][0] = vec[0];
@@ -176,7 +178,7 @@ void wavefront_model::scale(vec3& vec)
 	}
 }
 
-void wavefront_model::translate(vec3& vec)
+void wavefront_model::translate(const vec3& vec) noexcept
 {
 	matrix4 m = matrix4::identity();
 	m[0][3] = vec[0];

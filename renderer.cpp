@@ -47,7 +47,7 @@ void renderer::set_viewport(int width, int height)
 	}
 }
 
-void renderer::set_view(vec3& center, vec3& camera, vec3& up)
+void renderer::set_view(const vec3& center, const vec3& camera, const vec3& up) noexcept
 {
 	vec3 z = (camera - center).normalize();
 	vec3 x = geometry::cross_product(up, z).normalize();
@@ -64,52 +64,34 @@ void renderer::set_view(vec3& center, vec3& camera, vec3& up)
 	set_light(-light);
 }
 
-void renderer::set_light(vec3& light_pos)
+void renderer::set_light(const vec3& light_pos) noexcept
 {
 	light = vec4::project((projection * view).transponse().inverse() * vec3::embed_vector(-light_pos)).normalize();
 }
 
-void renderer::render_models(std::vector<wavefront_model*>& models, shader* shdr)
+void renderer::render_models(const std::vector<std::reference_wrapper<wavefront_model>>& models, shader* shdr) noexcept
 {
 	set_light_view();
 	shdr->prepare();
 
-	for (auto& model : models)
+	for (wavefront_model& model : models)
 	{
-		uint faces = model->faces_num();
+		uint faces = model.faces_num();
 
 		for (uint j = 0; j < faces; j++)
 		{
-			render_face_to_shadow_buffer(*model, j);
+			render_face_to_shadow_buffer(model, j);
 		}
 	}
 
-	for (auto& model : models)
+	for (wavefront_model& model : models)
 	{
-		uint faces = model->faces_num();
+		uint faces = model.faces_num();
 
 		for (uint j = 0; j < faces; j++)
 		{
-			render_face(*model, j, shdr);
+			render_face(model, j, shdr);
 		}
-	}
-}
-
-void renderer::render_model(wavefront_model& model, shader*shdr)
-{
-	set_light_view();
-	shdr->prepare();
-
-	int faces = model.faces_num();
-
-	for (int i = 0; i < faces; i++)
-	{
-		render_face_to_shadow_buffer(model, i);
-	}
-
-	for (int i = 0; i < faces; i++)
-	{
-		render_face(model, i, shdr);
 	}
 }
 
@@ -118,7 +100,7 @@ TGAImage& renderer::get_frame()
 	return *frame;
 }
 
-void renderer::render_face(wavefront_model& model, int face_ind, shader* shdr)
+void renderer::render_face(const wavefront_model& model, int face_ind, shader* shdr) noexcept
 {
 	matrix<4, 3> vert4 = { shdr->vertex(model, face_ind, 0), shdr->vertex(model, face_ind, 1), shdr->vertex(model, face_ind, 2) };
 
@@ -166,7 +148,7 @@ void renderer::render_face(wavefront_model& model, int face_ind, shader* shdr)
 	}
 }
 
-void renderer::render_face_to_shadow_buffer(wavefront_model& model, int face_ind)
+void renderer::render_face_to_shadow_buffer(const wavefront_model& model, int face_ind) noexcept
 {
 	face f = model.get_face(face_ind);
 
@@ -209,7 +191,7 @@ void renderer::render_face_to_shadow_buffer(wavefront_model& model, int face_ind
 	}
 }
 
-void renderer::set_light_view()
+void renderer::set_light_view() noexcept
 {
 	vec3 z = light;
 	vec3 x = geometry::cross_product(vec3({ 0.0f, 1.0f, 0.0f}), z).normalize();
@@ -220,7 +202,7 @@ void renderer::set_light_view()
 	light_view = M.inverse();
 }
 
-int renderer::get_shadow_buffer_value(int x, int y)
+int renderer::get_shadow_buffer_value(int x, int y) noexcept
 {
 	if (x < 0 || x >= width || y < 0 || y >= height)
 	{
