@@ -21,7 +21,7 @@ namespace graphics
 		float raw[SIZE];
 
 	public:
-		explicit vector()
+		explicit vector() noexcept
 		{
 			for (uint i = 0; i < SIZE; i++)
 			{
@@ -29,7 +29,7 @@ namespace graphics
 			}
 		}
 
-		vector(std::initializer_list<float> init_list)
+		vector(std::initializer_list<float> init_list) noexcept
 		{
 			uint i = 0;
 			auto iter = init_list.begin();

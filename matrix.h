@@ -15,16 +15,7 @@ namespace graphics
 		static const float E;
 
 	public:
-		explicit matrix() noexcept
-		{
-			for (uint i = 0; i < ROWS; i++)
-			{
-				for (uint j = 0; j < COLUMNS; j++)
-				{
-					raw[i].raw[j] = 0.0f;
-				}
-			}
-		}
+		explicit matrix() = default;
 
 		matrix(const std::initializer_list<vector<ROWS>> init_list) noexcept
 		{
